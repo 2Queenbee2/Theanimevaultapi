@@ -47,8 +47,8 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
-    // Fetch from Square Catalog API
-    const response = await fetch('https://connect.squareup.com/v2/catalog/list', {
+    // Fetch from Square Catalog API - include IMAGE objects to get product photos
+    const response = await fetch('https://connect.squareup.com/v2/catalog/list?types=ITEM,IMAGE', {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${SQUARE_ACCESS_TOKEN}`,
