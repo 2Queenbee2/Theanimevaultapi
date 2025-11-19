@@ -30,7 +30,7 @@ app.get('/api/products', async (req, res) => {
 
   try {
     console.log('🔄 Fetching from Square Catalog API...')
-    const response = await fetch('https://connect.squareup.com/v2/catalog/list', {
+    const response = await fetch('https://connect.squareup.com/v2/catalog/list?types=ITEM,IMAGE', {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${SQUARE_ACCESS_TOKEN}`,
@@ -79,7 +79,7 @@ app.get('/api/products', async (req, res) => {
       
       const imageIds = itemData?.image_ids || []
       const images = imageIds.map(id => imageMap.get(id)).filter(Boolean)
-      const primaryImage = images[0] || '/placeholder-product.jpg'
+      const primaryImage = images[0] || 'https://placehold.co/400x600/1a1a1a/666666?text=No+Image'
       
       const categoryId = itemData?.category_id
       const category = categoryId ? 'General' : 'Uncategorized'

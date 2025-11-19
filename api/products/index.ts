@@ -93,7 +93,7 @@ export default async function handler(req: any, res: any) {
   // Extract images (by image_ids via imageMap)
   const imageIds: string[] = itemData?.image_ids || []
   const images = imageIds.map((id: string) => imageMap.get(id)).filter(Boolean) as string[]
-      const primaryImage = images[0] || '/placeholder-product.jpg'
+      const primaryImage = images[0] || 'https://placehold.co/400x600/1a1a1a/666666?text=No+Image'
       
       // Extract category from the first category if available
       const categoryId = itemData?.category_id
