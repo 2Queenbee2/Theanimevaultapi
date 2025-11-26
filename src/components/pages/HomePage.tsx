@@ -154,13 +154,18 @@ export function HomePage({ featuredProducts, onAddToCart, onViewDetails, onNavig
                     <ArrowRight weight="bold" className="ml-2" />
                   </Button>
                 </a>
-                <Button
-                  onClick={() => onNavigate('shop')}
-                  variant="outline"
-                  className="border-gold/50 text-white hover:border-gold hover:bg-gold/10"
+                <a 
+                  href="https://otherworlds-awakening-webstore.tebex.io/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
                 >
-                  Minecraft Shop
-                </Button>
+                  <Button
+                    variant="outline"
+                    className="border-gold/50 text-white hover:border-gold hover:bg-gold/10"
+                  >
+                    Minecraft Shop
+                  </Button>
+                </a>
                 <Button
                   onClick={() => onNavigate('game')}
                   variant="outline"
