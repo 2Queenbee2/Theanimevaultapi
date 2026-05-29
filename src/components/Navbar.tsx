@@ -18,6 +18,7 @@ export function Navbar({ cartCount, onCartClick, currentPage, onNavigate }: Navb
   const navItems = [
     { label: 'Home', value: 'home' },
     { label: 'Shop', value: 'shop' },
+     { label: 'Minecraft Shop', value: 'minecraft-shop' },
     { label: 'Checkout', value: 'checkout' },
     { label: 'Gamers Corner', value: 'game' },
     { label: 'My Account', value: 'account' }
