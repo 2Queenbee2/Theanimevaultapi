@@ -1,12 +1,13 @@
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
-import { ShoppingBag, CheckCircle, Trash } from '@phosphor-icons/react'
+import { CreditCard, MapPin, User, ShoppingBag, CheckCircle, Trash } from '@phosphor-icons/react'
 import { useCurrency } from '@/lib/currency'
 import { CartItem } from '@/lib/types'
 
-// Corrected Props to match App.tsx state structure perfectly
+// Setup the prop interface so it receives data from App.tsx
 interface CheckoutPageProps {
   cartItems: CartItem[]
   onRemoveItem: (productId: string) => void
@@ -14,8 +15,8 @@ interface CheckoutPageProps {
 
 export function CheckoutPage({ cartItems = [], onRemoveItem }: CheckoutPageProps) {
   const { format } = useCurrency()
-  
-  // Corrected calculation accessing item.product.price
+
+  // Calculate dynamic totals using actual cart items
   const subtotal = cartItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
   const shipping = cartItems.length > 0 ? 9.99 : 0
   const tax = subtotal * 0.1 // 10% tax
@@ -39,12 +40,87 @@ export function CheckoutPage({ cartItems = [], onRemoveItem }: CheckoutPageProps
         </motion.div>
 
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Checkout Form - keeping your existing form code */}
+          {/* Checkout Form - Restored shipping and payment fields */}
           <Card className="p-8 bg-black/40 backdrop-blur-sm border-gold/20">
-            {/* ... keep your existing form code ... */}
+            <form onSubmit={(e) => e.preventDefault()} className="space-y-8">
+              {/* Shipping Information */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-gold to-blue-500 flex items-center justify-center">
+                    <MapPin size={20} className="text-white" />
+                  </div>
+                  <h2 className="text-2xl font-bold gradient-text-primary">Shipping Information</h2>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-white/70">First Name</label>
+                    <Input className="bg-black/40 border-gold/20 text-white focus:border-gold" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-white/70">Last Name</label>
+                    <Input className="bg-black/40 border-gold/20 text-white focus:border-gold" />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-white/70">Email</label>
+                  <Input type="email" className="bg-black/40 border-gold/20 text-white focus:border-gold" />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-white/70">Address</label>
+                  <Input className="bg-black/40 border-gold/20 text-white focus:border-gold" />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-white/70">City</label>
+                    <Input className="bg-black/40 border-gold/20 text-white focus:border-gold" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-white/70">Postal Code</label>
+                    <Input className="bg-black/40 border-gold/20 text-white focus:border-gold" />
+                  </div>
+                </div>
+              </div>
+
+              <Separator className="bg-gold/20" />
+
+              {/* Payment Information */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-gold to-blue-500 flex items-center justify-center">
+                    <CreditCard size={20} className="text-white" />
+                  </div>
+                  <h2 className="text-2xl font-bold gradient-text-primary">Payment Information</h2>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-white/70">Card Number</label>
+                  <Input placeholder="0000 0000 0000 0000" className="bg-black/40 border-gold/20 text-white focus:border-gold" />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-white/70">Expiry Date</label>
+                    <Input placeholder="MM/YY" className="bg-black/40 border-gold/20 text-white focus:border-gold" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-white/70">CVV</label>
+                    <Input placeholder="123" className="bg-black/40 border-gold/20 text-white focus:border-gold" />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-white/70">Cardholder Name</label>
+                  <Input className="bg-black/40 border-gold/20 text-white focus:border-gold" />
+                </div>
+              </div>
+            </form>
           </Card>
 
-          {/* Order Summary - Updated and Corrected */}
+          {/* Order Summary - Dynamic with Delete Buttons */}
           <Card className="p-8 bg-black/40 backdrop-blur-sm border-gold/20 h-fit">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 rounded-full bg-gradient-to-r from-gold to-blue-500 flex items-center justify-center">
@@ -53,7 +129,7 @@ export function CheckoutPage({ cartItems = [], onRemoveItem }: CheckoutPageProps
               <h2 className="text-2xl font-bold gradient-text-primary">Order Summary</h2>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-4 max-h-[350px] overflow-y-auto pr-2">
               {cartItems.length === 0 ? (
                 <p className="text-center text-white/70 py-8">Your cart is empty</p>
               ) : (
@@ -70,7 +146,7 @@ export function CheckoutPage({ cartItems = [], onRemoveItem }: CheckoutPageProps
                     </div>
                     <div className="text-gold font-bold">{format(item.product.price * item.quantity)}</div>
                     
-                    {/* Corrected delete button calling handleRemoveItem with string ID */}
+                    {/* WORKING DELETE BUTTON */}
                     <Button
                       variant="ghost"
                       size="icon"
