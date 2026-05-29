@@ -46,7 +46,7 @@ export function GamePage() {
             <h1 className="text-5xl md:text-7xl font-extrabold"><span className="gradient-text-animated block">Otherworlds</span><span className="text-3xl md:text-4xl mt-2 block">Awakening</span></h1>
             <p className="text-lg text-white/80 leading-relaxed">Dive into the ultimate anime-inspired Minecraft MMORPG experience. Command legendary power, embark on dimensional quests, customize custom weapons, and fight side-by-side with an active, welcoming community.</p>
             <div className="flex flex-wrap gap-4"><a href={DISCORD} target="_blank" rel="noreferrer"><Button className="h-12 px-8 bg-gradient-to-r from-gold to-yellow-400 text-black font-bold"><GameController size={20} className="mr-2" /> Join Discord</Button></a>
-              <Button variant="outline" onClick={() => { navigator.clipboard.writeText('otherworldsawakening.theanimevault.net'); alert('Server IP copied!') }} className="h-12 px-8 border-gold/30 hover:bg-gold/10 font-bold"><DownloadSimple size={20} className="mr-2" /> Copy Server IP</Button>
+              <Button variant="outline" onClick={() => { navigator.clipboard.writeText('otherworldsawakening.theanimevault.net'); alert('Server IP copied!') }} className="h-12 px-8 border-gold/30 text-white hover:bg-gold/10 font-bold"><DownloadSimple size={20} className="mr-2" /> Copy Server IP</Button>
             </div>
           </div>
           <a href={URL} target="_blank" rel="noreferrer" className="block relative aspect-video rounded-2xl overflow-hidden border border-gold/30 shadow-2xl group cursor-pointer">
@@ -54,7 +54,8 @@ export function GamePage() {
               <div className="w-16 h-16 rounded-full bg-gold/90 text-black flex items-center justify-center shadow-lg group-hover:scale-110 transition-all"><LinkSimple size={24} weight="bold" /></div>
               <span className="text-white text-xs font-bold uppercase tracking-widest mt-1 bg-black/60 border border-gold/20 px-3 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">Visit Notion Guide</span>
             </div>
-            <img src="/gamers-cover.png.png" alt="Notion" className="w-full h-full object-cover" />
+            {/* CORRECTED COVER IMAGE PATH */}
+            <img src="/gamers-cover.png" alt="Notion" className="w-full h-full object-cover" />
           </a>
         </div>
 
