@@ -142,8 +142,7 @@ export function GamePage() {
                 </div>
                 <span className="text-white text-xs font-bold uppercase tracking-widest mt-1 bg-black/60 border border-gold/20 px-3 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">Visit Notion Guide</span>
               </div>
-              <img src="https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=1200" alt="Click to visit Notion page" className="w-full h-full object-cover" />
-            </a>
+            <img src="/gamers-cover.png.png" alt="Click to visit Notion page" className="w-full h-full object-cover" />
           </motion.div>
         </div>
 
