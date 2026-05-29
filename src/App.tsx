@@ -119,33 +119,34 @@ function App() {
         onNavigate={setCurrentPage}
       />
 
-      <main className="flex-1 page-content">
-        {currentPage === 'home' && (
+    {currentPage === 'home' && (
           <HomePage
-            featuredProducts={featuredProducts}
+            onNavigate={setCurrentPage}
             onAddToCart={handleAddToCart}
             onViewDetails={handleViewDetails}
-            onNavigate={setCurrentPage}
+            featuredProducts={featuredProducts}
           />
         )}
-        
+
         {currentPage === 'shop' && (
           <ShopPage
             onAddToCart={handleAddToCart}
             onViewDetails={handleViewDetails}
           />
         )}
-        
+
         {currentPage === 'game' && <GamePage />}
-        
-        {currentPage === 'checkout' && <CheckoutPage />}
-        
+
+        {currentPage === 'checkout' && (
+          <CheckoutPage 
+            cartItems={cartItems} 
+            onRemoveItem={handleRemoveItem} 
+          />
+        )}
+
         {currentPage === 'account' && <AccountPage />}
 
         {currentPage === 'minecraft-shop' && <TebexProducts />}
-
-      </main>
-
       <Footer />
 
       <CartDrawer
