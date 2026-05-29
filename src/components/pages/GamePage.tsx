@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { GameController, DownloadSimple, Star, Users, HardDrives, WifiHigh, Trash, Upload, Lock, ShieldCheck, LinkSimple } from '@phosphor-icons/react'
+import { GameController, DownloadSimple, Star, Users, HardDrives, WifiHigh, Trash, Upload, Lock, ShieldCheck } from '@phosphor-icons/react'
 
 const DISCORD = (import.meta as any).env?.VITE_DISCORD_INVITE || 'https://discord.gg/'
 const PASS = 'admin', URL = 'https://skilllock.notion.site/?v=47f17ccfecf14b8d8ab4e8beb19a700f&pvs=74'
@@ -49,13 +49,15 @@ export function GamePage() {
               <Button variant="outline" onClick={() => { navigator.clipboard.writeText('otherworldsawakening.theanimevault.net'); alert('Server IP copied!') }} className="h-12 px-8 border-gold/30 text-white hover:bg-gold/10 font-bold"><DownloadSimple size={20} className="mr-2" /> Copy Server IP</Button>
             </div>
           </div>
-          <a href={URL} target="_blank" rel="noreferrer" className="block relative aspect-video rounded-2xl overflow-hidden border border-gold/30 shadow-2xl group cursor-pointer">
-            <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center gap-2 group-hover:bg-black/20 transition-all duration-300 z-10">
-              <div className="w-16 h-16 rounded-full bg-gold/90 text-black flex items-center justify-center shadow-lg group-hover:scale-110 transition-all"><LinkSimple size={24} weight="bold" /></div>
-              <span className="text-white text-xs font-bold uppercase tracking-widest mt-1 bg-black/60 border border-gold/20 px-3 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">Visit Notion Guide</span>
+          
+          {/* UPDATED HERO IMAGE CARD WITH NEW BTN AND CONTAINER FIT */}
+          <a href={URL} target="_blank" rel="noreferrer" className="block relative aspect-video rounded-2xl overflow-hidden border border-gold/30 shadow-2xl group cursor-pointer bg-black/40">
+            <div className="absolute inset-0 bg-black/50 flex items-center justify-center transition-all duration-300 z-10 group-hover:bg-black/30">
+              <span className="text-black text-xs font-black uppercase tracking-widest bg-gradient-to-r from-gold via-yellow-400 to-gold px-5 py-3 rounded-xl shadow-lg shadow-gold/40 scale-95 group-hover:scale-105 transition-all duration-300">
+                Visit Skill Lock Guide
+              </span>
             </div>
-            {/* CORRECTED COVER IMAGE PATH */}
-            <img src="/gamers-cover.png" alt="Notion" className="w-full h-full object-cover" />
+            <img src="/gamers-cover.png" alt="Skill Lock" className="w-full h-full object-contain p-2" />
           </a>
         </div>
 
