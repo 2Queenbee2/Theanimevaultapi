@@ -4,6 +4,7 @@ import { Toaster, toast } from 'sonner'
 import { Navbar } from '@/components/Navbar'
 import { Footer } from '@/components/Footer'
 import { CartDrawer } from '@/components/CartDrawer'
+import { TebexProducts } from '@/components/TebexProducts'
 import { ProductDetailModal } from '@/components/ProductDetailModal'
 import { HomePage } from '@/components/pages/HomePage'
 import { ShopPage } from '@/components/pages/ShopPage'
@@ -140,6 +141,9 @@ function App() {
         {currentPage === 'checkout' && <CheckoutPage />}
         
         {currentPage === 'account' && <AccountPage />}
+
+        {currentPage === 'minecraft-shop' && <TebexProducts />}
+
       </main>
 
       <Footer />
