@@ -284,7 +284,7 @@ export function GamePage() {
               <TabsTrigger value="media" className="data-[state=active]:bg-gold data-[state=active]:text-black rounded-lg text-sm font-bold py-2">Media</TabsTrigger>
             </TabsList>
 
-            {/* TAB 1: NEW TENSURA OVERVIEW TEXT */}
+            {/* TAB 1: OVERVIEW */}
             <TabsContent value="overview">
               <Card className="p-8 bg-black/40 backdrop-blur-sm border-gold/20">
                 <h2 className="text-3xl font-extrabold gradient-text-primary mb-6">About the Server</h2>
@@ -302,16 +302,34 @@ export function GamePage() {
               </Card>
             </TabsContent>
 
-            {/* TAB 2: FEATURES */}
+            {/* TAB 2: FEATURES (UPDATED WITH YOUR CUSTOM DESCRIPTIONS) */}
             <TabsContent value="features">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[
-                  { title: 'Custom 3D Weapons', desc: 'Wield custom sword, armor, and bow models designed to replicate powerful anime treasures.' },
-                  { title: 'Dynamic Boss Encounters', desc: 'Assemble teams to defeat massive, custom-coded bosses complete with attack stages.' },
-                  { title: 'Multiplayer Dungeons', desc: 'Team up with friends to explore custom puzzle dungeons, raids, and labyrinth layouts.' },
-                  { title: 'Spellcasting & Skills', desc: 'Acquire incredible skills and spell trees based on elemental and spatial magics.' },
-                  { title: 'Guilds & Factions', desc: 'Create factions with other players, compete in PvP seasons, and secure your guild hall.' },
-                  { title: 'Fully Custom Economy', desc: 'Trade, complete quests, manage shops, and purchase ranks via our unified shop!' }
+                  { 
+                    title: 'Custom Cosmetics', 
+                    desc: "Deck out your character with custom armor, weapons, tools & more — because standing out is the whole point." 
+                  },
+                  { 
+                    title: 'Dynamic Boss Encounters', 
+                    desc: "Face legendary bosses from Bosses Rise & Tensura — epic, brutal, and nothing like anything you've fought before." 
+                  },
+                  { 
+                    title: 'Choose your battle', 
+                    desc: "Your world, your rules — toggle PvP or PvE instantly with a quick command. Fight others or go solo, the choice is yours." 
+                  },
+                  { 
+                    title: 'Spellcasting & Skills', 
+                    desc: "Master powerful spells with Iron's Spells & Spellbooks — then unlock your true potential through a custom skill system tied to your race and evolution. Your power is earned, not given." 
+                  },
+                  { 
+                    title: 'Guilds and Homes', 
+                    desc: "Build your legacy — form powerful guilds, rise through the ranks, and claim your own rentable home. Every empire starts somewhere." 
+                  },
+                  { 
+                    title: 'Fully Custom Economy', 
+                    desc: 'Trade, complete quests, manage shops, and purchase ranks via our unified shop!' 
+                  }
                 ].map((feature, i) => (
                   <Card key={i} className="p-6 bg-black/40 border border-gold/20 hover:border-gold/50 transition-all duration-300">
                     <h3 className="text-lg font-bold text-white mb-2">{feature.title}</h3>
@@ -340,7 +358,6 @@ export function GamePage() {
                   </div>
                 </div>
 
-                {/* Authentication Forms */}
                 {!isAdminMode ? (
                   !showPasswordPrompt ? (
                     <Button 
@@ -380,13 +397,12 @@ export function GamePage() {
                 )}
               </Card>
 
-              {/* Upload Panel (Visible only when Admin Mode is unlocked) */}
+              {/* Upload Panel */}
               {isAdminMode && (
                 <Card className="p-6 bg-black/50 border border-gold/30 space-y-4">
                   <h3 className="text-lg font-bold text-gold">Upload New Server Photo</h3>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Method 1: Local File Uploader */}
                     <div className="space-y-2 border border-gold/10 p-4 rounded-lg bg-black/20 flex flex-col justify-between">
                       <div>
                         <span className="text-xs text-gold uppercase tracking-wider font-bold block mb-1">Option 1: Upload from Computer</span>
@@ -418,7 +434,6 @@ export function GamePage() {
                       </div>
                     </div>
 
-                    {/* Method 2: Image URL Parser */}
                     <form onSubmit={handleAddImageUrl} className="space-y-2 border border-gold/10 p-4 rounded-lg bg-black/20 flex flex-col justify-between">
                       <div>
                         <span className="text-xs text-gold uppercase tracking-wider font-bold block mb-1">Option 2: Add via Image URL</span>
@@ -452,24 +467,19 @@ export function GamePage() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {(mediaItems || []).map((media) => (
                   <div key={media.id} className="relative aspect-square rounded-xl overflow-hidden border border-gold/20 group shadow-lg">
-                    
-                    {/* Shadow overlay */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black via-black/10 to-transparent opacity-60 group-hover:opacity-40 transition-opacity duration-300 z-10" />
                     
-                    {/* Image rendering */}
                     <img 
                       src={media.src} 
                       alt={media.title} 
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
 
-                    {/* Image Details */}
                     <div className="absolute bottom-4 left-4 z-20 pr-10">
                       <span className="text-[10px] text-gold uppercase tracking-wider font-bold">Screenshot</span>
                       <h4 className="text-sm font-bold text-white mt-0.5 line-clamp-1">{media.title}</h4>
                     </div>
 
-                    {/* Trash Can Delete Button (Only visible in Owner Admin Mode) */}
                     {isAdminMode && (
                       <Button
                         variant="destructive"
