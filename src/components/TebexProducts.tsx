@@ -108,7 +108,7 @@ export default function TebexProducts() {
               </div>
               
               <a
-                href={`https://checkout.tebex.io/package/${product.id}`}
+                href={`https://otherworlds-awakening-webstore.tebex.io/package/${product.id}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-4 block w-full bg-gradient-to-r from-gold via-yellow-400 to-gold text-black font-bold py-2 px-4 rounded text-center hover:scale-105 transition-transform"
