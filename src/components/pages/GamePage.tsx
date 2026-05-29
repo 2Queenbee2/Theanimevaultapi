@@ -5,10 +5,13 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { GameController, DownloadSimple, Star, Users, HardDrives, WifiHigh, Trash, Upload, Lock, ShieldCheck } from '@phosphor-icons/react'
+import { GameController, DownloadSimple, Star, Users, HardDrives, WifiHigh, Trash, Upload, Lock, ShieldCheck, LinkSimple } from '@phosphor-icons/react'
 
 const DISCORD_INVITE = (import.meta as any).env?.VITE_DISCORD_INVITE || 'https://discord.com/invite/'
 const OWNER_PASSWORD = 'admin' // Feel free to change this password to whatever you want!
+
+// --- CONFIGURED WITH YOUR NOTION LINK ---
+const TRAILER_URL = 'https://skilllock.notion.site/?v=47f17ccfecf14b8d8ab4e8beb19a700f&pvs=74' 
 
 interface MediaItem {
   id: string
@@ -183,22 +186,36 @@ export function GamePage() {
             </div>
           </motion.div>
 
+          {/* CLICKABLE HERO IMAGE CARD WITH YOUR NOTION LINK */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="relative aspect-video rounded-2xl overflow-hidden border border-gold/30 shadow-2xl shadow-gold/10 group"
+            className="w-full"
           >
-            <div className="absolute inset-0 bg-black/40 flex items-center justify-center group-hover:bg-black/20 transition-all duration-300">
-              <div className="w-16 h-16 rounded-full bg-gold/90 text-black flex items-center justify-center shadow-lg group-hover:scale-110 transition-all cursor-pointer">
-                <span className="text-xl ml-1">▶</span>
+            <a 
+              href={TRAILER_URL} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="block relative aspect-video rounded-2xl overflow-hidden border border-gold/30 shadow-2xl shadow-gold/10 group cursor-pointer"
+            >
+              {/* Overlay on Hover */}
+              <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center gap-2 group-hover:bg-black/20 transition-all duration-300 z-10">
+                <div className="w-16 h-16 rounded-full bg-gold/90 text-black flex items-center justify-center shadow-lg group-hover:scale-110 transition-all">
+                  <LinkSimple size={24} weight="bold" />
+                </div>
+                <span className="text-white text-xs font-bold uppercase tracking-widest mt-1 bg-black/60 border border-gold/20 px-3 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  Visit Notion Guide
+                </span>
               </div>
-            </div>
-            <img 
-              src="https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=1200" 
-              alt="Otherworlds Trailer Thumbnail" 
-              className="w-full h-full object-cover"
-            />
+              
+              {/* Cover Image */}
+              <img 
+                src="https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=1200" 
+                alt="Click to visit Notion page" 
+                className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500"
+              />
+            </a>
           </motion.div>
         </div>
 
@@ -302,7 +319,7 @@ export function GamePage() {
               </Card>
             </TabsContent>
 
-            {/* TAB 2: FEATURES (UPDATED WITH YOUR CUSTOM DESCRIPTIONS) */}
+            {/* TAB 2: FEATURES */}
             <TabsContent value="features">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[
@@ -339,10 +356,10 @@ export function GamePage() {
               </div>
             </TabsContent>
 
-            {/* TAB 3: SECURE PERSISTENT MEDIA MANAGER */}
+            {/* TAB 3: MEDIA */}
             <TabsContent value="media" className="space-y-6">
               
-              {/* Owner Authentication / Control Panel */}
+              {/* Owner authentication */}
               <Card className="p-5 bg-black/60 border border-gold/20 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-gold/10 text-gold flex items-center justify-center border border-gold/20">
@@ -375,146 +392,4 @@ export function GamePage() {
                         onChange={(e) => setPasswordInput(e.target.value)}
                         className="bg-black border border-gold/20 text-white text-xs max-w-[150px]"
                       />
-                      <Button type="submit" className="bg-gold text-black text-xs font-bold px-3">
-                        Unlock
-                      </Button>
-                      <Button 
-                        type="button" 
-                        onClick={() => setShowPasswordInput(false)}
-                        className="bg-red-500/20 text-white border border-red-500/30 text-xs px-2"
-                      >
-                        Cancel
-                      </Button>
-                    </form>
-                  )
-                ) : (
-                  <Button 
-                    onClick={() => setIsAdminMode(false)}
-                    className="bg-red-500/20 text-red-300 border border-red-500/30 hover:bg-red-500/30 text-xs font-bold"
-                  >
-                    Lock Owner Mode
-                  </Button>
-                )}
-              </Card>
-
-              {/* Upload Panel */}
-              {isAdminMode && (
-                <Card className="p-6 bg-black/50 border border-gold/30 space-y-4">
-                  <h3 className="text-lg font-bold text-gold">Upload New Server Photo</h3>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2 border border-gold/10 p-4 rounded-lg bg-black/20 flex flex-col justify-between">
-                      <div>
-                        <span className="text-xs text-gold uppercase tracking-wider font-bold block mb-1">Option 1: Upload from Computer</span>
-                        <p className="text-xs text-white/50 mb-3">Upload any image file (.png, .jpg, .webp) directly from your device.</p>
-                      </div>
-                      <div className="space-y-3">
-                        <Input
-                          placeholder="Image Caption/Title (e.g. Castle Spawn)"
-                          value={newImageTitle}
-                          onChange={(e) => setNewImageTitle(e.target.value)}
-                          className="bg-black border border-gold/20 text-xs"
-                        />
-                        <div className="relative">
-                          <input
-                            type="file"
-                            accept="image/*"
-                            id="file-upload"
-                            onChange={handleFileUpload}
-                            className="hidden"
-                          />
-                          <label 
-                            htmlFor="file-upload"
-                            className="flex items-center justify-center gap-2 w-full h-10 bg-gold text-black text-xs font-bold rounded-lg cursor-pointer hover:bg-yellow-400 transition-colors"
-                          >
-                            <Upload size={16} />
-                            Choose & Upload File
-                          </label>
-                        </div>
-                      </div>
-                    </div>
-
-                    <form onSubmit={handleAddImageUrl} className="space-y-2 border border-gold/10 p-4 rounded-lg bg-black/20 flex flex-col justify-between">
-                      <div>
-                        <span className="text-xs text-gold uppercase tracking-wider font-bold block mb-1">Option 2: Add via Image URL</span>
-                        <p className="text-xs text-white/50 mb-3">Paste a direct web link to any image hosted online.</p>
-                      </div>
-                      <div className="space-y-3">
-                        <Input
-                          placeholder="Image Caption/Title"
-                          value={newImageTitle}
-                          onChange={(e) => setNewImageTitle(e.target.value)}
-                          className="bg-black border border-gold/20 text-xs"
-                        />
-                        <div className="flex gap-2">
-                          <Input
-                            placeholder="https://example.com/image.jpg"
-                            value={newImageUrl}
-                            onChange={(e) => setNewImageUrl(e.target.value)}
-                            className="bg-black border border-gold/20 text-xs flex-1"
-                          />
-                          <Button type="submit" className="bg-gold text-black text-xs font-bold">
-                            Add Link
-                          </Button>
-                        </div>
-                      </div>
-                    </form>
-                  </div>
-                </Card>
-              )}
-
-              {/* Image Gallery Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {(mediaItems || []).map((media) => (
-                  <div key={media.id} className="relative aspect-square rounded-xl overflow-hidden border border-gold/20 group shadow-lg">
-                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/10 to-transparent opacity-60 group-hover:opacity-40 transition-opacity duration-300 z-10" />
-                    
-                    <img 
-                      src={media.src} 
-                      alt={media.title} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-
-                    <div className="absolute bottom-4 left-4 z-20 pr-10">
-                      <span className="text-[10px] text-gold uppercase tracking-wider font-bold">Screenshot</span>
-                      <h4 className="text-sm font-bold text-white mt-0.5 line-clamp-1">{media.title}</h4>
-                    </div>
-
-                    {isAdminMode && (
-                      <Button
-                        variant="destructive"
-                        size="icon"
-                        onClick={() => handleDeleteImage(media.id)}
-                        className="absolute top-3 right-3 w-8 h-8 rounded-full bg-red-600 hover:bg-red-500 text-white z-30 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-md"
-                      >
-                        <Trash size={16} />
-                      </Button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </TabsContent>
-          </Tabs>
-        </div>
-
-        {/* Call to Action */}
-        <div className="max-w-4xl mx-auto mt-20 text-center space-y-6">
-          <h2 className="text-3xl md:text-4xl font-extrabold text-white">
-            Ready to Begin Your Adventure?
-          </h2>
-          <p className="text-md text-white/70 max-w-lg mx-auto leading-relaxed">
-            Join thousands of adventurers in the ever-expanding world of Otherworlds. Complete quests, dominate factions, and forge your legend.
-          </p>
-          <div className="pt-2">
-            <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer">
-              <Button className="h-12 px-8 bg-gradient-to-r from-gold to-yellow-400 hover:from-yellow-400 hover:to-gold text-black font-bold">
-                Join Us Today
-              </Button>
-            </a>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  )
-}
+                      <Button type="submit" className="bg-gold text-black text-xs font-bold
