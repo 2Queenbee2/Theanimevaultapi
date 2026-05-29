@@ -28,6 +28,7 @@ function formatPrice(price: number | null | undefined): string {
 
 export default function TebexProducts() {
   const token = import.meta.env.VITE_TEBEX_PUBLIC_TOKEN
+  const [activeCategory, setActiveCategory] = useState("All")
 
   const { data, error, isLoading } = useSWR(
     token ? `https://headless.tebex.io/api/accounts/${token}/packages` : null,
@@ -36,27 +37,36 @@ export default function TebexProducts() {
 
   if (!token) {
     return (
-      <div className="text-center py-12">
-        <p className="text-red-500 text-xl">VITE_TEBEX_PUBLIC_TOKEN is not configured</p>
+      <div className="flex items-center justify-center p-8 bg-black/40 border border-gold/20 rounded-xl text-white max-w-md mx-auto my-12">
+        <p className="text-md font-semibold text-red-400">VITE_TEBEX_PUBLIC_TOKEN is not configured</p>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="text-center py-12">
-        <p className="text-red-500 text-xl">Failed to load products</p>
-        <p className="text-gray-400">Please check your Tebex configuration and try again.</p>
+      <div className="flex flex-col items-center justify-center p-8 bg-black/40 border border-gold/20 rounded-xl text-white space-y-2 max-w-md mx-auto my-12">
+        <p className="text-md font-semibold text-red-400">Failed to load products</p>
+        <p className="text-xs text-white/70">Please check your Tebex configuration and try again.</p>
       </div>
     )
   }
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="bg-gray-800 rounded-lg p-4 animate-pulse h-64" />
-        ))}
+      <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
+        {/* Skeleton Filter Bar */}
+        <div className="flex gap-2 justify-center animate-pulse">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="w-24 h-9 bg-black/40 border border-gold/10 rounded-lg"></div>
+          ))}
+        </div>
+        {/* Skeleton Grids */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="animate-pulse bg-black/40 border border-gold/10 rounded-xl h-80"></div>
+          ))}
+        </div>
       </div>
     )
   }
@@ -65,60 +75,114 @@ export default function TebexProducts() {
 
   if (products.length === 0) {
     return (
-      <div className="text-center py-12">
-        <p className="text-white text-xl">No products found</p>
-        <p className="text-gray-400">Add some packages to your Tebex store to see them here.</p>
+      <div className="flex flex-col items-center justify-center p-12 bg-black/40 border border-gold/20 rounded-xl text-white space-y-2 max-w-md mx-auto my-12">
+        <p className="text-lg font-bold">No products found</p>
+        <p className="text-xs text-white/70">Add some packages to your Tebex store to see them here.</p>
       </div>
     )
   }
 
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-      {products.map((product) => {
-        const hasDiscount = product.sales_price !== null && product.sales_price < product.base_price
-        const displayPrice = hasDiscount ? product.sales_price : product.base_price
+  // 1. Get unique categories directly from your Tebex products
+  const uniqueCategories = [
+    "All",
+    ...Array.from(new Set(products.map((p) => p.category?.name).filter(Boolean)))
+  ]
 
-        return (
-          <div key={product.id} className="bg-gray-800 rounded-lg overflow-hidden shadow-lg">
-            {product.image ? (
-              <img
-                src={product.image}
-                alt={product.name}
-                className="w-full h-48 object-cover"
-              />
-            ) : (
-              <div className="w-full h-48 bg-gray-700 flex items-center justify-center">
-                <span className="text-gray-400">No Image</span>
-              </div>
-            )}
-            
-            <div className="p-4">
-              <h3 className="text-white text-lg font-bold mb-2">{product.name}</h3>
-              <p className="text-gray-400 text-sm mb-2">{product.category?.name || "Uncategorized"}</p>
-              
-              <div className="flex items-center gap-2 mt-4">
-                <span className="text-gold text-xl font-bold">
-                  {product.currency} {formatPrice(displayPrice)}
-                </span>
-                {hasDiscount && (
-                  <span className="text-gray-500 line-through text-sm">
-                    {product.currency} {formatPrice(product.base_price)}
-                  </span>
-                )}
-              </div>
-              
-              <a
-                href={`https://otherworlds-awakening-webstore.tebex.io/package/${product.id}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-4 block w-full bg-gradient-to-r from-gold via-yellow-400 to-gold text-black font-bold py-2 px-4 rounded text-center hover:scale-105 transition-transform"
+  // 2. Filter products based on selected tab
+  const filteredProducts = activeCategory === "All"
+    ? products
+    : products.filter((p) => p.category?.name === activeCategory)
+
+  return (
+    <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
+      {/* Category Filter Bar */}
+      <div className="flex flex-wrap gap-2 justify-center border-b border-gold/10 pb-6">
+        {uniqueCategories.map((category) => (
+          <button
+            key={category}
+            onClick={() => setActiveCategory(category)}
+            className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-300 border ${
+              activeCategory === category
+                ? "bg-gold text-black border-gold shadow-md shadow-gold/30"
+                : "bg-black/30 text-white/70 border-gold/20 hover:text-white hover:border-gold/50"
+            }`}
+          >
+            {category}
+          </button>
+        ))}
+      </div>
+
+      {/* Grid List */}
+      {filteredProducts.length === 0 ? (
+        <div className="text-center text-white/50 py-12">
+          No items found in this category.
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredProducts.map((product) => {
+            const hasDiscount = product.sales_price !== null && product.sales_price !== undefined
+            const displayPrice = hasDiscount ? product.sales_price : product.base_price
+
+            return (
+              <div
+                key={product.id}
+                className="flex flex-col bg-black/40 backdrop-blur-sm border border-gold/20 rounded-xl overflow-hidden shadow-lg hover:border-gold/50 transition-all duration-300"
               >
-                Buy Now
-              </a>
-            </div>
-          </div>
-        )
-      })}
+                {/* Image Container */}
+                <div className="relative w-full aspect-video md:aspect-square max-h-56 bg-black/30 flex items-center justify-center border-b border-gold/10 p-4">
+                  {product.image ? (
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      className="w-full h-full object-contain hover:scale-105 transition-transform duration-300"
+                    />
+                  ) : (
+                    <div className="text-white/40 text-sm flex flex-col items-center gap-2">
+                      <span className="text-3xl">📦</span>
+                      <span>No Image</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Details */}
+                <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                  <div>
+                    <h3 className="text-lg font-bold text-white line-clamp-1 hover:text-gold transition-colors duration-200">
+                      {product.name}
+                    </h3>
+                    <span className="inline-block mt-1.5 text-[10px] font-bold tracking-wider uppercase bg-gold/10 border border-gold/20 text-gold px-2 py-0.5 rounded-full">
+                      {product.category?.name || "Uncategorized"}
+                    </span>
+                  </div>
+
+                  {/* Price & Buy Button */}
+                  <div className="flex items-end justify-between pt-2">
+                    <div className="flex flex-col">
+                      <span className="text-xl font-black text-white">
+                        {product.currency} {formatPrice(displayPrice)}
+                      </span>
+                      {hasDiscount && (
+                        <span className="text-xs text-white/50 line-through mt-0.5">
+                          {product.currency} {formatPrice(product.base_price)}
+                        </span>
+                      )}
+                    </div>
+
+                    <a
+                      href={`https://otherworlds-awakening-webstore.tebex.io/package/${product.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="bg-gradient-to-r from-gold to-yellow-400 hover:from-yellow-400 hover:to-gold text-black text-xs font-bold px-4 py-2.5 rounded-lg transition-all duration-300"
+                    >
+                      Buy Now
+                    </a>
+                  </div>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }
