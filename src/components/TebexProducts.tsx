@@ -1,148 +1,124 @@
-"use client"
-
 import useSWR from "swr"
-import Image from "next/image"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Skeleton } from "@/components/ui/skeleton"
-import { ShoppingCart, Package } from "lucide-react"
-import type { TebexPackage } from "@/app/api/tebex/products/route"
+import { useState } from "react"
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json())
-
-function ProductSkeleton() {
-  return (
-    <Card className="overflow-hidden bg-slate-900/20 backdrop-blur-md border-cyan-500/20">
-      <Skeleton className="h-48 w-full rounded-none bg-slate-800/20" />
-      <CardHeader>
-        <Skeleton className="h-6 w-3/4 bg-slate-800/20" />
-      </CardHeader>
-      <CardContent>
-        <Skeleton className="h-4 w-full mb-2 bg-slate-800/20" />
-        <Skeleton className="h-4 w-2/3 bg-slate-800/20" />
-      </CardContent>
-      <CardFooter>
-        <Skeleton className="h-10 w-full bg-slate-800/20" />
-      </CardFooter>
-    </Card>
-  )
+interface TebexPackage {
+  id: number
+  name: string
+  description: string
+  image: string | null
+  base_price: number
+  sales_price: number | null
+  currency: string
+  category: {
+    id: number
+    name: string
+  }
 }
 
-function ProductCard({ product }: { product: TebexPackage }) {
-  const hasDiscount = product.sales_price !== null && product.sales_price < product.base_price
-  const displayPrice = hasDiscount ? product.sales_price : product.base_price
-
-  // Strip HTML tags from description for display
-  const cleanDescription = product.description
-    ? product.description.replace(/<[^>]*>/g, "").slice(0, 150)
-    : "No description available"
-
-  return (
-    <Card className="overflow-hidden flex flex-col h-full transition-all hover:shadow-lg hover:shadow-cyan-500/20 bg-slate-900/20 backdrop-blur-md border-cyan-500/20 hover:border-cyan-400/40">
-      <div className="relative h-48 bg-slate-800/20">
-        {product.image ? (
-          <Image
-            src={product.image}
-            alt={product.name}
-            fill
-            className="object-cover"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center">
-            <Package className="h-16 w-16 text-cyan-400/50" />
-          </div>
-        )}
-        {hasDiscount && (
-          <Badge className="absolute top-2 right-2 bg-red-500 hover:bg-red-600">
-            Sale
-          </Badge>
-        )}
-      </div>
-      <CardHeader className="pb-2">
-        <div className="flex items-start justify-between gap-2">
-          <CardTitle className="text-lg line-clamp-2 text-white">{product.name}</CardTitle>
-        </div>
-        <Badge variant="secondary" className="w-fit text-xs bg-cyan-500/20 text-cyan-200 border-cyan-500/30">
-          {product.category.name}
-        </Badge>
-      </CardHeader>
-      <CardContent className="flex-1">
-        <p className="text-sm text-cyan-100/70 line-clamp-3">
-          {cleanDescription}
-        </p>
-      </CardContent>
-      <CardFooter className="flex items-center justify-between pt-4 border-t border-cyan-500/20">
-        <div className="flex items-baseline gap-2">
-          <span className="text-xl font-bold text-white">
-            {product.currency} {displayPrice?.toFixed(2)}
-          </span>
-          {hasDiscount && (
-            <span className="text-sm text-cyan-300/50 line-through">
-              {product.currency} {product.base_price.toFixed(2)}
-            </span>
-          )}
-        </div>
-        <Button 
-          size="sm" 
-          className="gap-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 active:from-yellow-500 active:to-amber-400 focus:from-yellow-500 focus:to-amber-400 text-white font-semibold border-0 shadow-md transition-all duration-200"
-        >
-          <ShoppingCart className="h-4 w-4" />
-          Buy
-        </Button>
-      </CardFooter>
-    </Card>
-  )
+const fetcher = async (url: string) => {
+  const res = await fetch(url)
+  if (!res.ok) throw new Error("Failed to fetch")
+  return res.json()
 }
 
-export function TebexProducts() {
-  const { data, error, isLoading } = useSWR<{ data: TebexPackage[] }>(
-    "/api/tebex/products",
+function formatPrice(price: number | null | undefined): string {
+  if (price === null || price === undefined) return "0.00"
+  return Number(price).toFixed(2)
+}
+
+export default function TebexProducts() {
+  const token = import.meta.env.VITE_TEBEX_PUBLIC_TOKEN
+
+  const { data, error, isLoading } = useSWR(
+    token ? `https://headless.tebex.io/api/accounts/${token}/packages` : null,
     fetcher
   )
 
+  if (!token) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-red-500 text-xl">VITE_TEBEX_PUBLIC_TOKEN is not configured</p>
+      </div>
+    )
+  }
+
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-center bg-slate-900/20 backdrop-blur-md rounded-lg border border-cyan-500/20">
-        <Package className="h-12 w-12 text-cyan-400/50 mb-4" />
-        <h3 className="text-lg font-semibold text-white">Failed to load products</h3>
-        <p className="text-sm text-cyan-100/70 mt-1">
-          Please check your Tebex configuration and try again.
-        </p>
+      <div className="text-center py-12">
+        <p className="text-red-500 text-xl">Failed to load products</p>
+        <p className="text-gray-400">Please check your Tebex configuration and try again.</p>
       </div>
     )
   }
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
         {Array.from({ length: 6 }).map((_, i) => (
-          <ProductSkeleton key={i} />
+          <div key={i} className="bg-gray-800 rounded-lg p-4 animate-pulse h-64" />
         ))}
       </div>
     )
   }
 
-  const products = data?.data || []
+  const products: TebexPackage[] = data?.data || []
 
   if (products.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-center bg-slate-900/20 backdrop-blur-md rounded-lg border border-cyan-500/20">
-        <Package className="h-12 w-12 text-cyan-400/50 mb-4" />
-        <h3 className="text-lg font-semibold text-white">No products found</h3>
-        <p className="text-sm text-cyan-100/70 mt-1">
-          Add some packages to your Tebex store to see them here.
-        </p>
+      <div className="text-center py-12">
+        <p className="text-white text-xl">No products found</p>
+        <p className="text-gray-400">Add some packages to your Tebex store to see them here.</p>
       </div>
     )
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {products.map((product) => (
-        <ProductCard key={product.id} product={product} />
-      ))}
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+      {products.map((product) => {
+        const hasDiscount = product.sales_price !== null && product.sales_price < product.base_price
+        const displayPrice = hasDiscount ? product.sales_price : product.base_price
+
+        return (
+          <div key={product.id} className="bg-gray-800 rounded-lg overflow-hidden shadow-lg">
+            {product.image ? (
+              <img
+                src={product.image}
+                alt={product.name}
+                className="w-full h-48 object-cover"
+              />
+            ) : (
+              <div className="w-full h-48 bg-gray-700 flex items-center justify-center">
+                <span className="text-gray-400">No Image</span>
+              </div>
+            )}
+            
+            <div className="p-4">
+              <h3 className="text-white text-lg font-bold mb-2">{product.name}</h3>
+              <p className="text-gray-400 text-sm mb-2">{product.category?.name || "Uncategorized"}</p>
+              
+              <div className="flex items-center gap-2 mt-4">
+                <span className="text-gold text-xl font-bold">
+                  {product.currency} {formatPrice(displayPrice)}
+                </span>
+                {hasDiscount && (
+                  <span className="text-gray-500 line-through text-sm">
+                    {product.currency} {formatPrice(product.base_price)}
+                  </span>
+                )}
+              </div>
+              
+              <a
+                href={`https://checkout.tebex.io/package/${product.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-4 block w-full bg-gradient-to-r from-gold via-yellow-400 to-gold text-black font-bold py-2 px-4 rounded text-center hover:scale-105 transition-transform"
+              >
+                Buy Now
+              </a>
+            </div>
+          </div>
+        )
+      })}
     </div>
   )
 }
