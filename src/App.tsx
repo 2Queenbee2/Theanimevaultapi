@@ -149,12 +149,15 @@ function App() {
         {currentPage === 'minecraft-shop' && <TebexProducts />}
       <Footer />
 
-      <CartDrawer
+     <CartDrawer
         open={cartOpen}
-        onOpenChange={setCartOpen}
-        items={cartItems || []}
+        onOpenChange={setCartOpen} // Match the prop from your file
+        items={cartItems}
         onUpdateQuantity={handleUpdateQuantity}
         onRemoveItem={handleRemoveItem}
+        onCheckout={() => {
+          setCurrentPage('checkout')
+        }}
       />
 
       <ProductDetailModal
