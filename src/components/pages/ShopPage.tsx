@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
 import { ProductCard } from '@/components/ProductCard'
 import { Product } from '@/lib/types'
 import { Input } from '@/components/ui/input'
@@ -10,11 +9,40 @@ interface ShopPageProps {
   onViewDetails: (product: Product) => void
 }
 
+const CATEGORY_ORDER = [
+  'Posters',
+  'Playmats',
+  'Mouse Pads',
+  'T-Shirts',
+  'Backpacks',
+  'Journals',
+  'Car Accessories',
+  'Other'
+]
+
+function getCategory(product: any): string {
+  const name = (product.name || '').toLowerCase()
+  const tags = (product.tags || []).map((t: any) => 
+    typeof t === 'string' ? t.toLowerCase() : ''
+  )
+  const category = (product.category || '').toLowerCase()
+
+  if (category === 'posters' || tags.includes('poster')) return 'Posters'
+  if (name.includes('playmat') || tags.includes('mouse pad') && name.includes('play')) return 'Playmats'
+  if (name.includes('mouse pad') || name.includes('led mouse') || tags.includes('mouse pad')) return 'Mouse Pads'
+  if (name.includes('tee') || name.includes('shirt') || tags.includes('t-shirts')) return 'T-Shirts'
+  if (name.includes('backpack') || tags.includes('backpacks')) return 'Backpacks'
+  if (name.includes('journal') || tags.includes('journals')) return 'Journals'
+  if (name.includes('car seat') || tags.includes('car')) return 'Car Accessories'
+  return 'Other'
+}
+
 export function ShopPage({ onAddToCart, onViewDetails }: ShopPageProps) {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
+  const [activeCategory, setActiveCategory] = useState('All')
 
   useEffect(() => {
     loadProducts()
@@ -24,12 +52,31 @@ export function ShopPage({ onAddToCart, onViewDetails }: ShopPageProps) {
     setLoading(true)
     setError(null)
     try {
-      const response = await fetch('/api/gelato/products')
-      if (!response.ok) throw new Error(`HTTP ${response.status}`)
-      const data = await response.json()
-      setProducts(data.data || [])
+      const [gelatoRes, printifyRes] = await Promise.all([
+        fetch('/api/gelato/products'),
+        fetch('/api/printify/products')
+      ])
+
+      const gelatoData = gelatoRes.ok ? await gelatoRes.json() : { data: [] }
+      const printifyData = printifyRes.ok ? await printifyRes.json() : { data: [] }
+
+      const allProducts = [
+        ...(gelatoData.data || []),
+        ...(printifyData.data || [])
+      ]
+
+      // Deduplicate by name to remove Printify duplicates
+      const seen = new Set()
+      const unique = allProducts.filter(p => {
+        const key = p.name.trim().toLowerCase()
+        if (seen.has(key)) return false
+        seen.add(key)
+        return true
+      })
+
+      setProducts(unique)
     } catch (err: any) {
-      console.error('Failed to load Gelato products:', err)
+      console.error('Failed to load products:', err)
       setError(`Failed to load products: ${err.message}`)
       setProducts([])
     } finally {
@@ -37,10 +84,18 @@ export function ShopPage({ onAddToCart, onViewDetails }: ShopPageProps) {
     }
   }
 
-  const filteredProducts = products.filter(product =>
-    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (product.description || '').toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const categorized = products.map(p => ({ ...p, _category: getCategory(p) }))
+
+  const filteredProducts = categorized.filter(product => {
+    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (product.description || '').toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesCategory = activeCategory === 'All' || product._category === activeCategory
+    return matchesSearch && matchesCategory
+  })
+
+  const availableCategories = ['All', ...CATEGORY_ORDER.filter(cat =>
+    categorized.some(p => p._category === cat)
+  )]
 
   if (loading) {
     return (
@@ -59,7 +114,7 @@ export function ShopPage({ onAddToCart, onViewDetails }: ShopPageProps) {
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold mb-4">Our Shop</h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Discover our collection of premium anime posters
+            Discover our collection of premium anime merchandise
           </p>
         </div>
 
@@ -72,7 +127,8 @@ export function ShopPage({ onAddToCart, onViewDetails }: ShopPageProps) {
           </div>
         )}
 
-        <div className="mb-8">
+        {/* Search */}
+        <div className="mb-6">
           <div className="relative max-w-md">
             <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
             <Input
@@ -85,20 +141,61 @@ export function ShopPage({ onAddToCart, onViewDetails }: ShopPageProps) {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredProducts.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              onAddToCart={onAddToCart}
-              onViewDetails={onViewDetails}
-            />
+        {/* Category Tabs */}
+        <div className="flex flex-wrap gap-2 mb-8">
+          {availableCategories.map(cat => (
+            <button
+              key={cat}
+              onClick={() => setActiveCategory(cat)}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                activeCategory === cat
+                  ? 'bg-gold text-black'
+                  : 'bg-black/30 text-white hover:bg-black/50'
+              }`}
+            >
+              {cat}
+            </button>
           ))}
         </div>
 
+        {/* Products Grid */}
+        {activeCategory === 'All' ? (
+          // Show by category sections
+          CATEGORY_ORDER.map(cat => {
+            const catProducts = filteredProducts.filter(p => p._category === cat)
+            if (catProducts.length === 0) return null
+            return (
+              <div key={cat} className="mb-12">
+                <h2 className="text-2xl font-bold mb-6 text-white border-b border-gold/30 pb-2">{cat}</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {catProducts.map(product => (
+                    <ProductCard
+                      key={product.id}
+                      product={product}
+                      onAddToCart={onAddToCart}
+                      onViewDetails={onViewDetails}
+                    />
+                  ))}
+                </div>
+              </div>
+            )
+          })
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {filteredProducts.map(product => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                onAddToCart={onAddToCart}
+                onViewDetails={onViewDetails}
+              />
+            ))}
+          </div>
+        )}
+
         {filteredProducts.length === 0 && !loading && (
           <div className="text-center py-12">
-            <p className="text-lg text-muted-foreground">No products found matching your search.</p>
+            <p className="text-lg text-muted-foreground">No products found.</p>
           </div>
         )}
       </div>
