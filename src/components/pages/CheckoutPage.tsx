@@ -34,7 +34,7 @@ export function CheckoutPage({ cartItems = [], onRemoveItem }: CheckoutPageProps
   })
 
   const subtotal = cartItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
-  const shipping = cartItems.length > 0 ? 9.99 : 0
+  const shipping = cartItems.length > 0 ? (subtotal >= 50 ? 0 : 8) : 0
   const tax = subtotal * 0.13
   const total = subtotal + shipping + tax
 
