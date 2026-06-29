@@ -35,90 +35,17 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
-    // Fetch template details for each product to get preview images
     const products = await Promise.all(GELATO_PRODUCTS.map(async (product) => {
-      try {
-        const response = await fetch(
-          `https://product.gelatoapis.com/v3/templates/${product.templateId}`,
-          {
-            headers: {
-              'X-API-KEY': GELATO_API_KEY,
-              'Content-Type': 'application/json'
-            }
-          }
-        )
+      // Use template ID for image filename
+      const image = `/product-images/${product.templateId}.jpeg`
 
-        let image = '/product-images/placeholder.png'
-        if (response.ok) {
-          const data = await response.json()
-          image = data?.previews?.[0]?.url || data?.preview?.url || image
-        }
-
-        return {
-          id: product.id,
-          name: product.name,
-          price: product.price,
-          image: image,
-          images: [image],
-          category: 'Posters',
-          categories: [{ id: 'posters', name: 'Posters', slug: 'posters' }],
-          inStock: true,
-          featured: true,
-          description: 'Premium A0 Classic Semi-Glossy Paper Poster. 170 gsm paper weight, FSC-certified, shipped in robust packaging.',
-          tags: ['poster', 'anime'],
-          sku: product.id,
-          templateId: product.templateId,
-          productUid: product.productUid,
-          fulfillment: 'gelato',
-          variations: [
-            {
-              id: `${product.id}-a0`,
-              name: 'A0 (84.1 x 118.9 cm) - Vertical',
-              price: product.price,
-              inStock: true,
-              attributes: { sku: product.id }
-            }
-          ]
-        }
-      } catch (_) {
-        return {
-          id: product.id,
-          name: product.name,
-          price: product.price,
-          image: '/product-images/placeholder.png',
-          images: ['/product-images/placeholder.png'],
-          category: 'Posters',
-          categories: [{ id: 'posters', name: 'Posters', slug: 'posters' }],
-          inStock: true,
-          featured: true,
-          description: 'Premium A0 Classic Semi-Glossy Paper Poster.',
-          tags: ['poster', 'anime'],
-          sku: product.id,
-          templateId: product.templateId,
-          productUid: product.productUid,
-          fulfillment: 'gelato',
-          variations: [
-            {
-              id: `${product.id}-a0`,
-              name: 'A0 (84.1 x 118.9 cm) - Vertical',
-              price: product.price,
-              inStock: true,
-              attributes: { sku: product.id }
-            }
-          ]
-        }
-      }
-    }))
-
-    return res.status(200).json({
-      data: products,
-      total: products.length,
-      limit: products.length,
-      offset: 0,
-      hasMore: false
-    })
-
-  } catch (error: any) {
-    return res.status(500).json({ error: error.message })
-  }
-}
+      return {
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: image,
+        images: [image],
+        category: 'Posters',
+        categories: [{ id: 'posters', name: 'Posters', slug: 'posters' }],
+        inStock: true,
+        featured: true,
