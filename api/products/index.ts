@@ -33,7 +33,6 @@ interface SquareProduct {
   }>
 }
 
-// Vercel function signature without Next.js types
 export default async function handler(req: any, res: any) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' })
@@ -47,7 +46,6 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
-    // Fetch from Square Catalog API - include IMAGE objects to get product photos
     const response = await fetch('https://connect.squareup.com/v2/catalog/list?types=ITEM,IMAGE', {
       method: 'GET',
       headers: {
@@ -69,7 +67,7 @@ export default async function handler(req: any, res: any) {
 
     const data = await response.json()
     
-    // Build a map of image_id -> image URL (Square IMAGE objects)
+    // Build a map of image_id -> image URL
     const imageMap = new Map<string, string>()
     const allObjects = Array.isArray(data.objects) ? data.objects : []
     for (const obj of allObjects) {
@@ -78,28 +76,34 @@ export default async function handler(req: any, res: any) {
       }
     }
 
-    // Filter for ITEM type objects and transform to our product format
     const items = allObjects.filter((obj: any) => obj.type === 'ITEM') || []
     
     const products: SquareProduct[] = items.map((item: any) => {
       const itemData = item.item_data
       const variations = itemData?.variations || []
       
-      // Get the first variation for base pricing
       const baseVariation = variations[0]
       const baseMoney = baseVariation?.item_variation_data?.price_money
-      const basePrice = baseMoney ? baseMoney.amount / 100 : 0 // Convert from cents
-      
-  // Extract images (by image_ids via imageMap)
-  const imageIds: string[] = itemData?.image_ids || []
-  const images = imageIds.map((id: string) => imageMap.get(id)).filter(Boolean) as string[]
+      const basePrice = baseMoney ? baseMoney.amount / 100 : 0
+
+      // Extract images - check item level first, then variation level as fallback
+      const imageIds: string[] = itemData?.image_ids || []
+      let images = imageIds.map((id: string) => imageMap.get(id)).filter(Boolean) as string[]
+
+      // Fallback: check variation-level image_ids
+      if (images.length === 0) {
+        for (const variation of variations) {
+          const uris = variation?.item_variation_data?.image_ids || []
+          const found = uris.map((id: string) => imageMap.get(id)).filter(Boolean) as string[]
+          if (found.length > 0) { images = found; break }
+        }
+      }
+
       const primaryImage = images[0] || 'https://placehold.co/400x600/1a1a1a/666666?text=No+Image'
       
-      // Extract category from the first category if available
       const categoryId = itemData?.category_id
-      const category = categoryId ? 'General' : 'Uncategorized' // We'll resolve category names in a separate call if needed
+      const category = categoryId ? 'General' : 'Uncategorized'
       
-      // Transform variations
       const productVariations = variations.map((variation: any) => {
         const variationData = variation.item_variation_data
         const priceMoney = variationData?.price_money
@@ -127,15 +131,14 @@ export default async function handler(req: any, res: any) {
         images: images,
         category: category,
         categories: [{ id: categoryId || 'general', name: category, slug: category.toLowerCase().replace(/\s+/g, '-') }],
-  inStock: productVariations.some((v: any) => v.inStock),
-        featured: true, // Mark all products as featured by default, or use: itemData?.label_color === 'FF0000'
+        inStock: productVariations.some((v: any) => v.inStock),
+        featured: true,
         tags: itemData?.categories || [],
         sku: baseVariation?.item_variation_data?.sku || item.id,
         variations: productVariations
       }
     })
 
-    // Apply query parameters for filtering
     let filteredProducts = products
     
     const query = req.query || {}
@@ -145,7 +148,6 @@ export default async function handler(req: any, res: any) {
     const limit = query.limit ?? '20'
     const offset = query.offset ?? '0'
 
-    // Search filter
     if (search && typeof search === 'string') {
       const searchLower = search.toLowerCase()
       filteredProducts = filteredProducts.filter(product =>
@@ -155,19 +157,16 @@ export default async function handler(req: any, res: any) {
       )
     }
 
-    // Category filter
     if (category && typeof category === 'string') {
       filteredProducts = filteredProducts.filter(product =>
         product.category.toLowerCase() === category.toLowerCase()
       )
     }
 
-    // Featured filter
     if (featured === 'true') {
       filteredProducts = filteredProducts.filter(product => product.featured)
     }
 
-    // Pagination
     const limitNum = parseInt(limit as string) || 20
     const offsetNum = parseInt(offset as string) || 0
     const paginatedProducts = filteredProducts.slice(offsetNum, offsetNum + limitNum)
