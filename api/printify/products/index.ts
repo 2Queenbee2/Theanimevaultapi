@@ -12,20 +12,41 @@ export default async function handler(req: any, res: any) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
+
   if (!PRINTIFY_ACCESS_TOKEN || !PRINTIFY_SHOP_ID) {
     return res.status(500).json({ error: 'Printify API misconfigured' })
   }
+
   try {
-    const response = await fetch(
-      `https://api.printify.com/v1/shops/${PRINTIFY_SHOP_ID}/products.json`,
-      { headers: { 'Authorization': `Bearer ${PRINTIFY_ACCESS_TOKEN}` } }
-    )
-    if (!response.ok) {
-      const errorText = await response.text()
-      return res.status(response.status).json({ error: 'Printify API error', details: errorText })
+    let allItems: any[] = []
+    let page = 1
+    let hasMore = true
+
+    // Fetch all pages
+    while (hasMore) {
+      const response = await fetch(
+        `https://api.printify.com/v1/shops/${PRINTIFY_SHOP_ID}/products.json?page=${page}&limit=50`,
+        { headers: { 'Authorization': `Bearer ${PRINTIFY_ACCESS_TOKEN}` } }
+      )
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        return res.status(response.status).json({ error: 'Printify API error', details: errorText })
+      }
+
+      const data = await response.json()
+      const items = data.data || []
+      allItems = [...allItems, ...items]
+
+      // Check if there are more pages
+      if (items.length < 50 || allItems.length >= data.total) {
+        hasMore = false
+      } else {
+        page++
+      }
     }
-    const data = await response.json()
-    const products = (data.data || []).map((item: any) => ({
+
+    const products = allItems.map((item: any) => ({
       id: item.id,
       name: item.title,
       description: item.description || '',
@@ -38,7 +59,9 @@ export default async function handler(req: any, res: any) {
         id: v.id, name: v.title, price: v.price / 100, inStock: v.is_enabled
       }))
     }))
+
     return res.status(200).json({ data: products, total: products.length })
+
   } catch (error: any) {
     return res.status(500).json({ error: error.message })
   }
