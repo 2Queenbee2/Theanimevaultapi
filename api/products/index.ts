@@ -10,12 +10,6 @@ function getEnv(name: string, fallback?: string): string {
 const SQUARE_ACCESS_TOKEN = getEnv('SQUARE_ACCESS_TOKEN')
 const SQUARE_LOCATION_ID = getEnv('SQUARE_LOCATION_ID')
 
-// Backup images for products that Square fails to return images for
-// Key = SKU, Value = public image path
-const BACKUP_IMAGES: Record<string, string> = {
-  'T497014': '/product-images/rimuru-slime.png'
-}
-
 interface SquareProduct {
   id: string
   name: string
@@ -133,11 +127,12 @@ export default async function handler(req: any, res: any) {
         } catch (_) {}
       }
 
-      // Final fallback: check local backup images by SKU
+      // Final fallback: use SKU-named image from public/product-images/
+      // Just upload an image named {SKU}.png to public/product-images/ and it auto-loads!
       let primaryImage = images[0]
       if (!primaryImage) {
-        primaryImage = BACKUP_IMAGES[sku] || 'https://placehold.co/400x600/1a1a1a/666666?text=No+Image'
-        if (BACKUP_IMAGES[sku]) images = [BACKUP_IMAGES[sku]]
+        primaryImage = `/product-images/${sku}.png`
+        images = [primaryImage]
       }
 
       const categoryId = itemData?.category_id
