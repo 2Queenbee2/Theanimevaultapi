@@ -1,14 +1,6 @@
 import { DiscordLogo, TwitterLogo, InstagramLogo, YoutubeLogo, EnvelopeSimple } from '@phosphor-icons/react'
 import logoImage from '@/assets/logo/New Logo.png'
 
-const ABOUT_US = `Anime is more than entertainment—it's art, storytelling, and a culture that brings millions of people together. The Anime Vault was built to celebrate that passion.
-
-We're creating a destination where anime fans can discover premium merchandise inspired by the worlds they love, while becoming part of a community that values creativity, quality, and authenticity.
-
-Quality comes first. From the materials we choose to the designs we create and the experience we deliver, every detail matters.
-
-But The Anime Vault is more than a store. We're building an anime ecosystem where fans can connect beyond shopping through our Discord community, events, giveaways, and our custom Minecraft server.`
-
 export function Footer() {
   return (
     <footer className="border-t border-border bg-black/40 backdrop-blur-md mt-auto">
@@ -34,18 +26,10 @@ export function Footer() {
           <div className="space-y-4">
             <h3 className="font-semibold text-foreground">Shop</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>
-                <a href="/shop" className="hover:text-gold cursor-pointer transition-colors">Posters</a>
-              </li>
-              <li>
-                <a href="/shop" className="hover:text-gold cursor-pointer transition-colors">Apparel</a>
-              </li>
-              <li>
-                <a href="/shop" className="hover:text-gold cursor-pointer transition-colors">Accessories</a>
-              </li>
-              <li>
-                <a href="/shop" className="hover:text-gold cursor-pointer transition-colors">Playmats & Mouse Pads</a>
-              </li>
+              <li className="hover:text-gold cursor-pointer transition-colors">Posters</li>
+              <li className="hover:text-gold cursor-pointer transition-colors">Apparel</li>
+              <li className="hover:text-gold cursor-pointer transition-colors">Accessories</li>
+              <li className="hover:text-gold cursor-pointer transition-colors">Playmats & Mouse Pads</li>
             </ul>
           </div>
 
@@ -65,19 +49,20 @@ export function Footer() {
                 </button>
               </li>
               <li>
-                <a href="#game" onClick={(e) => { e.preventDefault(); window.dispatchEvent(new CustomEvent('navigate', { detail: 'game' })) }} className="hover:text-gold cursor-pointer transition-colors">
-                  Otherworlds Game
-                </a>
-              </li>
-              <li>
                 <a href="https://discord.gg/HZ33WY4RdH" target="_blank" rel="noopener noreferrer" className="hover:text-gold cursor-pointer transition-colors">
                   Community
                 </a>
               </li>
               <li>
-                <a href="mailto:theanimevault.official2025@gmail.com" className="hover:text-gold cursor-pointer transition-colors">
+                <button 
+                  onClick={() => {
+                    const modal = document.getElementById('contact-modal')
+                    if (modal) modal.style.display = 'flex'
+                  }}
+                  className="hover:text-gold cursor-pointer transition-colors text-left"
+                >
                   Contact
-                </a>
+                </button>
               </li>
             </ul>
           </div>
@@ -85,7 +70,7 @@ export function Footer() {
           {/* Connect */}
           <div className="space-y-4">
             <h3 className="font-semibold text-foreground">Connect</h3>
-            <div className="flex gap-3">
+            <div className="flex gap-3 flex-wrap">
               <a href="https://discord.gg/HZ33WY4RdH" target="_blank" rel="noopener noreferrer">
                 <button className="w-10 h-10 rounded-lg bg-secondary hover:bg-gold/20 hover:text-gold transition-all flex items-center justify-center">
                   <DiscordLogo size={20} weight="fill" />
@@ -100,17 +85,16 @@ export function Footer() {
               <button className="w-10 h-10 rounded-lg bg-secondary hover:bg-gold/20 hover:text-gold transition-all flex items-center justify-center">
                 <YoutubeLogo size={20} weight="fill" />
               </button>
-              <a href="mailto:theanimevault.official2025@gmail.com">
-                <button className="w-10 h-10 rounded-lg bg-secondary hover:bg-gold/20 hover:text-gold transition-all flex items-center justify-center">
-                  <EnvelopeSimple size={20} weight="fill" />
-                </button>
-              </a>
+              <button 
+                onClick={() => {
+                  const modal = document.getElementById('contact-modal')
+                  if (modal) modal.style.display = 'flex'
+                }}
+                className="w-10 h-10 rounded-lg bg-secondary hover:bg-gold/20 hover:text-gold transition-all flex items-center justify-center"
+              >
+                <EnvelopeSimple size={20} weight="fill" />
+              </button>
             </div>
-            <p className="text-sm text-muted-foreground">
-              <a href="mailto:theanimevault.official2025@gmail.com" className="hover:text-gold transition-colors">
-                theanimevault.official2025@gmail.com
-              </a>
-            </p>
           </div>
         </div>
 
@@ -174,6 +158,63 @@ export function Footer() {
             <div className="border-t border-gold/20 pt-4 text-center">
               <p className="text-white font-bold text-lg">Welcome to The Anime Vault.</p>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Contact Modal */}
+      <div 
+        id="contact-modal"
+        style={{ display: 'none' }}
+        className="fixed inset-0 z-50 items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+        onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            const modal = document.getElementById('contact-modal')
+            if (modal) modal.style.display = 'none'
+          }
+        }}
+      >
+        <div className="bg-card border border-gold/20 rounded-2xl p-8 max-w-md w-full">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold gradient-text-primary">Contact Us</h2>
+            <button 
+              onClick={() => {
+                const modal = document.getElementById('contact-modal')
+                if (modal) modal.style.display = 'none'
+              }}
+              className="text-white/50 hover:text-white text-2xl"
+            >
+              ✕
+            </button>
+          </div>
+          
+          <div className="space-y-6 text-sm text-muted-foreground">
+            <p>Have a question, concern, or just want to say hi? We'd love to hear from you!</p>
+            
+            <div className="bg-black/30 rounded-xl p-4 border border-gold/20">
+              <p className="text-white font-medium mb-1">📧 Email Us</p>
+              <a 
+                href="mailto:theanimevault.official2025@gmail.com"
+                className="text-gold hover:underline break-all"
+              >
+                theanimevault.official2025@gmail.com
+              </a>
+            </div>
+
+            <div className="bg-black/30 rounded-xl p-4 border border-gold/20">
+              <p className="text-white font-medium mb-1">💬 Join Our Discord</p>
+              <a 
+                href="https://discord.gg/HZ33WY4RdH" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-gold hover:underline"
+              >
+                discord.gg/HZ33WY4RdH
+              </a>
+              <p className="text-xs mt-1">Fastest way to get a response!</p>
+            </div>
+
+            <p className="text-xs">We typically respond within 24-48 hours.</p>
           </div>
         </div>
       </div>
