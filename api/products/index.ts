@@ -13,7 +13,7 @@ const SQUARE_LOCATION_ID = getEnv('SQUARE_LOCATION_ID')
 // Backup images for products that Square fails to return images for
 // Key = SKU, Value = public image path
 const BACKUP_IMAGES: Record<string, string> = {
-  'T497014': '/product-images/queenbee5948_rimuru_in_his_slime_form_bold_colours_magical_back_9754ce23-c69b-4939-a54a-f304f7d08a57.png'
+  'T497014': '/product-images/rimuru-slime.png'
 }
 
 interface SquareProduct {
