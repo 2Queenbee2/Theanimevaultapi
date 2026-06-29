@@ -1,23 +1,26 @@
 # Product Images Backup Folder
 
-This folder contains backup images for Square products that fail to return images via the Square API.
+This folder contains images for Gelato products displayed on the website.
 
 ## How it works
-If Square does not return an image for a product, the system automatically looks for an image in this folder named after the product's SKU.
+Each product image is named after its **Gelato Template ID** and must be a JPEG file.
+The system automatically matches the image to the product using the template ID.
 
-## How to add a backup image for a new product
+## How to add an image for a new product
 
-1. Find the product's SKU in Square (go to the product → Variations → SKU column)
-2. Compress the image to under 300KB using https://imageresizer.com/resize/editor
-3. Rename the image file to the SKU number e.g. `T497014.png`
-4. Upload it to this folder (Add file → Upload files)
-5. Commit — the image will automatically show on the website!
+1. Create your poster template in Gelato
+2. Copy the **Template ID** from the 3-dot menu on the template card
+3. Compress the image to under 300KB using https://imageresizer.com/resize/editor
+4. Rename the image file to the Template ID e.g. `6dc978ea-62d8-4bdf-a702-df92a065c38a.jpeg`
+5. Upload it to this folder (Add file → Upload files)
+6. Add the product to the `GELATO_PRODUCTS` list in `api/gelato/products/index.ts`
+7. Commit — the image will automatically show on the website!
 
 ## Example
-- SKU: `T497014` → filename: `T497014.png` → Product: Rimuru Slime
+- Template ID: `6dc978ea-62d8-4bdf-a702-df92a065c38a` → filename: `6dc978ea-62d8-4bdf-a702-df92a065c38a.jpeg` → Product: Rimuru Poster
 
 ## Notes
-- Images must be PNG format
+- Images must be JPEG format
 - Keep file size under 300KB for fast loading
-- If Square fixes their image linking bug, the Square image will take priority automatically
-- The SKU can be found in Square Dashboard → Items → click product → Variations section
+- The Template ID can be found by clicking the 3-dot menu on any template in Gelato → Copy template ID
+- Images must be at least 75 DPI for
