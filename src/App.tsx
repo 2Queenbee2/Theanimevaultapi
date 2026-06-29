@@ -31,11 +31,29 @@ function App() {
   useEffect(() => {
     const loadFeaturedProducts = async () => {
       try {
-        const response = await fetch('/api/gelato/products')
-        if (!response.ok) throw new Error(`HTTP ${response.status}`)
-        const data = await response.json()
-        const products = (data.data || []).slice(-6).reverse()
-        setFeaturedProducts(products)
+        const [gelatoRes, printifyRes] = await Promise.all([
+          fetch('/api/gelato/products'),
+          fetch('/api/printify/products')
+        ])
+        const gelatoData = gelatoRes.ok ? await gelatoRes.json() : { data: [] }
+        const printifyData = printifyRes.ok ? await printifyRes.json() : { data: [] }
+
+        const allProducts = [
+          ...(gelatoData.data || []),
+          ...(printifyData.data || [])
+        ]
+
+        // Deduplicate by ID
+        const seen = new Set()
+        const unique = allProducts.filter(p => {
+          if (seen.has(p.id)) return false
+          seen.add(p.id)
+          return true
+        })
+
+        // Show 6 random products from full catalog
+        const shuffled = unique.sort(() => Math.random() - 0.5).slice(0, 6)
+        setFeaturedProducts(shuffled)
       } catch (err) {
         console.error('Failed to load featured products:', err)
         setFeaturedProducts([])
