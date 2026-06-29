@@ -1,5 +1,4 @@
-// Square Catalog API - Get All Products (Vercel Serverless Function)
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// Gelato Products API - Get All Products (Vercel Serverless Function)
 declare const process: any
 
 function getEnv(name: string, fallback?: string): string {
@@ -7,216 +6,95 @@ function getEnv(name: string, fallback?: string): string {
   return value && value.length > 0 ? value : (fallback || '')
 }
 
-const SQUARE_ACCESS_TOKEN = getEnv('SQUARE_ACCESS_TOKEN')
-const SQUARE_LOCATION_ID = getEnv('SQUARE_LOCATION_ID')
+const GELATO_API_KEY = getEnv('GELATO_API_KEY')
 
-interface SquareProduct {
-  id: string
-  name: string
-  description?: string
-  price: number
-  originalPrice?: number
-  image: string
-  images: string[]
-  category: string
-  categories: Array<{ id: string; name: string; slug: string }>
-  inStock: boolean
-  featured: boolean
-  tags: string[]
-  sku: string
-  variations: Array<{
-    id: string
-    name: string
-    price: number
-    inStock: boolean
-    attributes: Record<string, string>
-  }>
-}
+const GELATO_PRODUCTS = [
+  { id: 'nami', name: 'Nami Poster', templateId: 'a19dc6b0-9f4e-4859-ba2f-8aa0684f17cc', productUid: 'flat_a0_170-gsm-65lb-coated-silk_4-0_ver' },
+  { id: 'kakashi', name: 'Kakashi Poster', templateId: 'b5acac16-b73d-478f-81b0-3a5d77fae0a9', productUid: 'flat_a0_170-gsm-65lb-coated-silk_4-0_ver' },
+  { id: 'itachi', name: 'Itachi Poster', templateId: '5a59e5cb-9d50-4d13-8c0c-85f3be7229ec', productUid: 'flat_a0_170-gsm-65lb-coated-silk_4-0_ver' },
+  { id: 'gojo', name: 'Gojo Poster', templateId: 'dae66722-45f3-45d2-b8bc-101066a88ebb', productUid: 'flat_a0_170-gsm-65lb-coated-silk_4-0_ver' },
+  { id: 'daki', name: 'Daki Poster', templateId: '7823fb53-ed87-49db-9784-16fdb37811fb', productUid: 'flat_a0_170-gsm-65lb-coated-silk_4-0_ver' },
+  { id: 'tifa', name: 'Tifa Poster', templateId: 'cb4eb6a7-7dc3-46dc-9a77-26503718b33c', productUid: 'flat_a0_170-gsm-65lb-coated-silk_4-0_ver' },
+  { id: 'naruto', name: 'Naruto Poster', templateId: '51346f09-f5ce-48ca-b661-de175538468b', productUid: 'flat_a0_170-gsm-65lb-coated-silk_4-0_ver' },
+  { id: 'eren', name: 'Eren Poster', templateId: '1a0024f6-d616-4290-adc3-82eb91a6cd5d', productUid: 'flat_a0_170-gsm-65lb-coated-silk_4-0_ver' },
+  { id: 'asuna', name: 'Asuna Poster', templateId: 'fdb7433b-ee1b-4c0d-89e4-2f38a596f257', productUid: 'flat_a0_170-gsm-65lb-coated-silk_4-0_ver' },
+  { id: 'nezuko', name: 'Nezuko Poster', templateId: '00eed4ce-18b3-46ba-93db-5f0d4b00154b', productUid: 'flat_a0_170-gsm-65lb-coated-silk_4-0_ver' },
+  { id: 'bakugo', name: 'Bakugo Poster', templateId: '2b925cef-d17a-468c-ae38-a144409fac13', productUid: 'flat_a0_170-gsm-65lb-coated-silk_4-0_ver' },
+  { id: 'nezuko-pink', name: 'Nezuko Pink Poster', templateId: '584e6b63-a4c6-4dfc-88de-665e930af0c4', productUid: 'flat_a0_170-gsm-65lb-coated-silk_4-0_ver' },
+  { id: 'rimuru', name: 'Rimuru Poster', templateId: '6dc978ea-62d8-4bdf-a702-df92a065c38a', productUid: 'flat_a0_170-gsm-65lb-coated-silk_4-0_ver' },
+]
 
 export default async function handler(req: any, res: any) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
-  if (!SQUARE_ACCESS_TOKEN) {
-    return res.status(500).json({
-      error: 'Square API misconfigured',
-      details: 'Missing SQUARE_ACCESS_TOKEN in environment variables'
-    })
+  if (!GELATO_API_KEY) {
+    return res.status(500).json({ error: 'Gelato API misconfigured' })
   }
 
   try {
-    const response = await fetch('https://connect.squareup.com/v2/catalog/list?types=ITEM,IMAGE', {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${SQUARE_ACCESS_TOKEN}`,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Square-Version': '2023-12-13'
-      }
-    })
-
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error('Square API Error:', response.status, errorText)
-      return res.status(response.status).json({
-        error: 'Square API request failed',
-        details: `HTTP ${response.status}: ${errorText}`
-      })
-    }
-
-    const data = await response.json()
-
-    const imageMap = new Map<string, string>()
-    const allObjects = Array.isArray(data.objects) ? data.objects : []
-    for (const obj of allObjects) {
-      if (obj?.type === 'IMAGE' && obj?.image_data?.url && obj?.id) {
-        imageMap.set(obj.id, obj.image_data.url)
-      }
-    }
-
-    const items = allObjects.filter((obj: any) => obj.type === 'ITEM') || []
-
-    const products: SquareProduct[] = await Promise.all(items.map(async (item: any) => {
-      const itemData = item.item_data
-      const variations = itemData?.variations || []
-
-      const baseVariation = variations[0]
-      const baseMoney = baseVariation?.item_variation_data?.price_money
-      const basePrice = baseMoney ? baseMoney.amount / 100 : 0
-      const sku = baseVariation?.item_variation_data?.sku || item.id
-
-      // Extract images - check item level first
-      const imageIds: string[] = itemData?.image_ids || []
-      let images = imageIds.map((id: string) => imageMap.get(id)).filter(Boolean) as string[]
-
-      // Fallback: check variation-level image_ids
-      if (images.length === 0) {
-        for (const variation of variations) {
-          const uris = variation?.item_variation_data?.image_ids || []
-          const found = uris.map((id: string) => imageMap.get(id)).filter(Boolean) as string[]
-          if (found.length > 0) { images = found; break }
-        }
-      }
-
-      // Fallback: fetch full catalog object
-      if (images.length === 0) {
-        try {
-          const objRes = await fetch(
-            `https://connect.squareup.com/v2/catalog/object/${item.id}`,
-            {
-              headers: {
-                'Authorization': `Bearer ${SQUARE_ACCESS_TOKEN}`,
-                'Square-Version': '2023-12-13'
-              }
+    const products = await Promise.all(GELATO_PRODUCTS.map(async (product) => {
+      const image = `/product-images/${product.templateId}.jpeg`
+      
+      // Try to fetch price from Gelato API
+      let price = 30 // default fallback price
+      try {
+        const priceRes = await fetch(
+          `https://product.gelatoapis.com/v3/products/${product.productUid}/prices?currency=CAD`,
+          {
+            headers: {
+              'X-API-KEY': GELATO_API_KEY,
+              'Content-Type': 'application/json'
             }
-          )
-          if (objRes.ok) {
-            const objData = await objRes.json()
-            const related = Array.isArray(objData.related_objects) ? objData.related_objects : []
-            const fallbackMap = new Map<string, string>()
-            for (const obj of related) {
-              if (obj?.type === 'IMAGE' && obj?.image_data?.url && obj?.id) {
-                fallbackMap.set(obj.id, obj.image_data.url)
-              }
-            }
-            const fallbackIds: string[] = objData.object?.item_data?.image_ids || []
-            const fallbackImages = fallbackIds.map((id: string) => fallbackMap.get(id)).filter(Boolean) as string[]
-            if (fallbackImages.length > 0) images = fallbackImages
           }
-        } catch (_) {}
-      }
-
-      // Final fallback: use SKU-named image from public/product-images/
-      // Just upload an image named {SKU}.png to public/product-images/ and it auto-loads!
-      let primaryImage = images[0]
-      if (!primaryImage) {
-        primaryImage = `/product-images/${sku}.png`
-        images = [primaryImage]
-      }
-
-      const categoryId = itemData?.category_id
-      const category = categoryId ? 'General' : 'Uncategorized'
-
-      const productVariations = variations.map((variation: any) => {
-        const variationData = variation.item_variation_data
-        const priceMoney = variationData?.price_money
-        const price = priceMoney ? priceMoney.amount / 100 : 0
-        return {
-          id: variation.id,
-          name: variationData?.name || 'Default',
-          price: price,
-          inStock: !variationData?.track_inventory || (variationData?.inventory_alert_threshold || 0) > 0,
-          attributes: {
-            sku: variationData?.sku || '',
-            upc: variationData?.upc || ''
-          }
+        )
+        if (priceRes.ok) {
+          const priceData = await priceRes.json()
+          const productPrice = priceData?.prices?.[0]?.price
+          if (productPrice) price = productPrice
         }
-      })
+      } catch (_) {
+        // Keep default price if API fails
+      }
 
       return {
-        id: item.id,
-        name: itemData?.name || 'Unnamed Product',
-        description: itemData?.description || '',
-        price: basePrice,
-        originalPrice: basePrice,
-        image: primaryImage,
-        images: images,
-        category: category,
-        categories: [{ id: categoryId || 'general', name: category, slug: category.toLowerCase().replace(/\s+/g, '-') }],
-        inStock: productVariations.some((v: any) => v.inStock),
+        id: product.id,
+        name: product.name,
+        price: price,
+        image: image,
+        images: [image],
+        category: 'Posters',
+        categories: [{ id: 'posters', name: 'Posters', slug: 'posters' }],
+        inStock: true,
         featured: true,
-        tags: itemData?.categories || [],
-        sku: sku,
-        variations: productVariations
+        description: 'Premium A0 Classic Semi-Glossy Paper Poster. 170 gsm paper weight, FSC-certified, shipped in robust packaging.',
+        tags: ['poster', 'anime'],
+        sku: product.id,
+        templateId: product.templateId,
+        productUid: product.productUid,
+        fulfillment: 'gelato',
+        variations: [
+          {
+            id: `${product.id}-a0`,
+            name: 'A0 (84.1 x 118.9 cm) - Vertical',
+            price: price,
+            inStock: true,
+            attributes: { sku: product.id }
+          }
+        ]
       }
     }))
 
-    let filteredProducts = products
-
-    const query = req.query || {}
-    const search = query.search
-    const category = query.category
-    const featured = query.featured
-    const limit = query.limit ?? '20'
-    const offset = query.offset ?? '0'
-
-    if (search && typeof search === 'string') {
-      const searchLower = search.toLowerCase()
-      filteredProducts = filteredProducts.filter(product =>
-        (product.name || '').toLowerCase().includes(searchLower) ||
-        (product.description || '').toLowerCase().includes(searchLower) ||
-        (product.tags || []).some(tag => (tag || '').toLowerCase().includes(searchLower))
-      )
-    }
-
-    if (category && typeof category === 'string') {
-      filteredProducts = filteredProducts.filter(product =>
-        product.category.toLowerCase() === category.toLowerCase()
-      )
-    }
-
-    if (featured === 'true') {
-      filteredProducts = filteredProducts.filter(product => product.featured)
-    }
-
-    const limitNum = parseInt(limit as string) || 20
-    const offsetNum = parseInt(offset as string) || 0
-    const paginatedProducts = filteredProducts.slice(offsetNum, offsetNum + limitNum)
-
-    res.status(200).json({
-      data: paginatedProducts,
-      total: filteredProducts.length,
-      limit: limitNum,
-      offset: offsetNum,
-      hasMore: offsetNum + limitNum < filteredProducts.length
+    return res.status(200).json({
+      data: products,
+      total: products.length,
+      limit: products.length,
+      offset: 0,
+      hasMore: false
     })
 
   } catch (error: any) {
-    console.error('Square Catalog API Error:', error)
-    res.status(500).json({
-      error: 'Failed to fetch products from Square',
-      details: error.message
-    })
+    return res.status(500).json({ error: error.message })
   }
 }
