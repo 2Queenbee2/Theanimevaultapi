@@ -15,6 +15,12 @@ import { Product, CartItem } from '@/lib/types'
 import { backgrounds, PageType } from '@/lib/backgrounds'
 import { CurrencyProvider } from '@/lib/currency'
 
+// ============================================
+// STORE SETTINGS
+// Set to true when Square payment is approved
+// ============================================
+const PAYMENTS_ENABLED = false
+
 function App() {
   const [currentPage, setCurrentPage] = useState('home')
   const [cartOpen, setCartOpen] = useState(false)
@@ -22,14 +28,12 @@ function App() {
   const [cartItems, setCartItems] = useKV<CartItem[]>('cart-items', [])
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([])
 
-  // Load featured products from Gelato - shows latest 6 products
   useEffect(() => {
     const loadFeaturedProducts = async () => {
       try {
         const response = await fetch('/api/gelato/products')
         if (!response.ok) throw new Error(`HTTP ${response.status}`)
         const data = await response.json()
-        // Sort by newest first and take the latest 6
         const products = (data.data || []).slice(-6).reverse()
         setFeaturedProducts(products)
       } catch (err) {
@@ -41,14 +45,16 @@ function App() {
   }, [])
 
   const handleAddToCart = (product: Product) => {
+    if (!PAYMENTS_ENABLED) {
+      toast.info('Our store is coming soon! Payment processing is being set up.')
+      return
+    }
     if (!product.inStock) {
       toast.error('This item is currently out of stock')
       return
     }
-
     setCartItems((currentItems: CartItem[] = []) => {
       const existingItem = currentItems.find(item => item.product.id === product.id)
-      
       if (existingItem) {
         toast.success('Updated quantity in cart')
         return currentItems.map(item =>
@@ -85,7 +91,6 @@ function App() {
   }
 
   const cartCount = (cartItems || []).reduce((sum, item) => sum + item.quantity, 0)
-
   const currentBackground = backgrounds[currentPage as PageType] || backgrounds.home
 
   return (
@@ -101,10 +106,23 @@ function App() {
             backgroundAttachment: 'fixed'
           }}
         ></div>
+
+        {/* Coming Soon Banner */}
+        {!PAYMENTS_ENABLED && (
+          <div className="bg-gold text-black text-center py-2 text-sm font-semibold z-50 relative">
+            🛒 Our shop is almost open! Payment processing is being finalized. Browse our products now!
+          </div>
+        )}
         
         <Navbar
           cartCount={cartCount}
-          onCartClick={() => setCartOpen(true)}
+          onCartClick={() => {
+            if (!PAYMENTS_ENABLED) {
+              toast.info('Our store is coming soon! Payment processing is being set up.')
+              return
+            }
+            setCartOpen(true)
+          }}
           currentPage={currentPage}
           onNavigate={setCurrentPage}
         />
@@ -128,14 +146,22 @@ function App() {
         {currentPage === 'game' && <GamePage />}
 
         {currentPage === 'checkout' && (
-          <CheckoutPage 
-            cartItems={cartItems} 
-            onRemoveItem={handleRemoveItem} 
-          />
+          PAYMENTS_ENABLED ? (
+            <CheckoutPage 
+              cartItems={cartItems} 
+              onRemoveItem={handleRemoveItem} 
+            />
+          ) : (
+            <div className="min-h-screen flex items-center justify-center">
+              <div className="text-center space-y-4 p-8">
+                <h1 className="text-4xl font-bold text-white">Coming Soon!</h1>
+                <p className="text-white/70 text-lg">We're finalizing our payment system. Check back soon!</p>
+              </div>
+            </div>
+          )
         )}
 
         {currentPage === 'account' && <AccountPage />}
-
         {currentPage === 'minecraft-shop' && <TebexProducts />}
         
         <Footer />
@@ -147,6 +173,10 @@ function App() {
           onUpdateQuantity={handleUpdateQuantity}
           onRemoveItem={handleRemoveItem}
           onCheckout={() => {
+            if (!PAYMENTS_ENABLED) {
+              toast.info('Our store is coming soon!')
+              return
+            }
             setCurrentPage('checkout')
           }}
         />
