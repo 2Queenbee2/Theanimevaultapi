@@ -28,8 +28,8 @@ function getCategory(product: any): string {
   const category = (product.category || '').toLowerCase()
 
   if (category === 'posters' || tags.includes('poster')) return 'Posters'
-  if (name.includes('playmat') || tags.includes('mouse pad') && name.includes('play')) return 'Playmats'
-  if (name.includes('mouse pad') || name.includes('led mouse') || tags.includes('mouse pad')) return 'Mouse Pads'
+  if (name.includes('playmat') || (name.includes('desk') && name.includes('gaming'))) return 'Playmats'
+  if (name.includes('mouse pad') || name.includes('led mouse')) return 'Mouse Pads'
   if (name.includes('tee') || name.includes('shirt') || tags.includes('t-shirts')) return 'T-Shirts'
   if (name.includes('backpack') || tags.includes('backpacks')) return 'Backpacks'
   if (name.includes('journal') || tags.includes('journals')) return 'Journals'
@@ -65,12 +65,11 @@ export function ShopPage({ onAddToCart, onViewDetails }: ShopPageProps) {
         ...(printifyData.data || [])
       ]
 
-      // Deduplicate by name to remove Printify duplicates
+      // Deduplicate by ID only
       const seen = new Set()
       const unique = allProducts.filter(p => {
-        const key = p.name.trim().toLowerCase()
-        if (seen.has(key)) return false
-        seen.add(key)
+        if (seen.has(p.id)) return false
+        seen.add(p.id)
         return true
       })
 
@@ -160,7 +159,6 @@ export function ShopPage({ onAddToCart, onViewDetails }: ShopPageProps) {
 
         {/* Products Grid */}
         {activeCategory === 'All' ? (
-          // Show by category sections
           CATEGORY_ORDER.map(cat => {
             const catProducts = filteredProducts.filter(p => p._category === cat)
             if (catProducts.length === 0) return null
