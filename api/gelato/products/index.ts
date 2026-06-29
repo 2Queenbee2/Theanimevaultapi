@@ -49,3 +49,33 @@ export default async function handler(req: any, res: any) {
         categories: [{ id: 'posters', name: 'Posters', slug: 'posters' }],
         inStock: true,
         featured: true,
+        description: 'Premium A0 Classic Semi-Glossy Paper Poster. 170 gsm paper weight, FSC-certified, shipped in robust packaging.',
+        tags: ['poster', 'anime'],
+        sku: product.id,
+        templateId: product.templateId,
+        productUid: product.productUid,
+        fulfillment: 'gelato',
+        variations: [
+          {
+            id: `${product.id}-a0`,
+            name: 'A0 (84.1 x 118.9 cm) - Vertical',
+            price: product.price,
+            inStock: true,
+            attributes: { sku: product.id }
+          }
+        ]
+      }
+    }))
+
+    return res.status(200).json({
+      data: products,
+      total: products.length,
+      limit: products.length,
+      offset: 0,
+      hasMore: false
+    })
+
+  } catch (error: any) {
+    return res.status(500).json({ error: error.message })
+  }
+}
