@@ -10,6 +10,12 @@ function getEnv(name: string, fallback?: string): string {
 const SQUARE_ACCESS_TOKEN = getEnv('SQUARE_ACCESS_TOKEN')
 const SQUARE_LOCATION_ID = getEnv('SQUARE_LOCATION_ID')
 
+// Backup images for products that Square fails to return images for
+// Key = SKU, Value = public image path
+const BACKUP_IMAGES: Record<string, string> = {
+  'T497014': '/product-images/queenbee5948_rimuru_in_his_slime_form_bold_colours_magical_back_9754ce23-c69b-4939-a54a-f304f7d08a57.png'
+}
+
 interface SquareProduct {
   id: string
   name: string
@@ -67,7 +73,6 @@ export default async function handler(req: any, res: any) {
 
     const data = await response.json()
 
-    // Build a map of image_id -> image URL
     const imageMap = new Map<string, string>()
     const allObjects = Array.isArray(data.objects) ? data.objects : []
     for (const obj of allObjects) {
@@ -78,7 +83,6 @@ export default async function handler(req: any, res: any) {
 
     const items = allObjects.filter((obj: any) => obj.type === 'ITEM') || []
 
-    // Process all products, with fallback fetches for missing images
     const products: SquareProduct[] = await Promise.all(items.map(async (item: any) => {
       const itemData = item.item_data
       const variations = itemData?.variations || []
@@ -86,6 +90,7 @@ export default async function handler(req: any, res: any) {
       const baseVariation = variations[0]
       const baseMoney = baseVariation?.item_variation_data?.price_money
       const basePrice = baseMoney ? baseMoney.amount / 100 : 0
+      const sku = baseVariation?.item_variation_data?.sku || item.id
 
       // Extract images - check item level first
       const imageIds: string[] = itemData?.image_ids || []
@@ -100,7 +105,7 @@ export default async function handler(req: any, res: any) {
         }
       }
 
-      // Fallback: fetch full catalog object which includes related_objects with images
+      // Fallback: fetch full catalog object
       if (images.length === 0) {
         try {
           const objRes = await fetch(
@@ -128,7 +133,12 @@ export default async function handler(req: any, res: any) {
         } catch (_) {}
       }
 
-      const primaryImage = images[0] || 'https://placehold.co/400x600/1a1a1a/666666?text=No+Image'
+      // Final fallback: check local backup images by SKU
+      let primaryImage = images[0]
+      if (!primaryImage) {
+        primaryImage = BACKUP_IMAGES[sku] || 'https://placehold.co/400x600/1a1a1a/666666?text=No+Image'
+        if (BACKUP_IMAGES[sku]) images = [BACKUP_IMAGES[sku]]
+      }
 
       const categoryId = itemData?.category_id
       const category = categoryId ? 'General' : 'Uncategorized'
@@ -162,7 +172,7 @@ export default async function handler(req: any, res: any) {
         inStock: productVariations.some((v: any) => v.inStock),
         featured: true,
         tags: itemData?.categories || [],
-        sku: baseVariation?.item_variation_data?.sku || item.id,
+        sku: sku,
         variations: productVariations
       }
     }))
