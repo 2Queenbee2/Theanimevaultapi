@@ -1,4 +1,4 @@
-﻿import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useKV } from '@github/spark/hooks'
 import { Toaster, toast } from 'sonner'
 import { Navbar } from '@/components/Navbar'
@@ -11,10 +11,8 @@ import { ShopPage } from '@/components/pages/ShopPage'
 import { GamePage } from '@/components/pages/GamePage'
 import { CheckoutPage } from '@/components/pages/CheckoutPage'
 import { AccountPage } from '@/components/pages/AccountPage'
-import { products as localProducts } from '@/lib/products'
 import { Product, CartItem } from '@/lib/types'
 import { backgrounds, PageType } from '@/lib/backgrounds'
-import { squareService, convertSquareProduct } from '@/lib/square'
 import { CurrencyProvider } from '@/lib/currency'
 
 function App() {
@@ -22,9 +20,25 @@ function App() {
   const [cartOpen, setCartOpen] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [cartItems, setCartItems] = useKV<CartItem[]>('cart-items', [])
-  const [featuredProducts, setFeaturedProducts] = useState<Product[]>(
-    (localProducts || []).filter(p => p.featured).slice(0, 6)
-  )
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([])
+
+  // Load featured products from Gelato - shows latest 6 products
+  useEffect(() => {
+    const loadFeaturedProducts = async () => {
+      try {
+        const response = await fetch('/api/gelato/products')
+        if (!response.ok) throw new Error(`HTTP ${response.status}`)
+        const data = await response.json()
+        // Sort by newest first and take the latest 6
+        const products = (data.data || []).slice(-6).reverse()
+        setFeaturedProducts(products)
+      } catch (err) {
+        console.error('Failed to load featured products:', err)
+        setFeaturedProducts([])
+      }
+    }
+    loadFeaturedProducts()
+  }, [])
 
   const handleAddToCart = (product: Product) => {
     if (!product.inStock) {
@@ -60,7 +74,9 @@ function App() {
   }
 
   const handleRemoveItem = (productId: string) => {
-    setCartItems((currentItems: CartItem[] = []) => currentItems.filter(item => item.product.id !== productId))
+    setCartItems((currentItems: CartItem[] = []) => 
+      currentItems.filter(item => item.product.id !== productId)
+    )
     toast.success('Removed from cart')
   }
 
@@ -70,56 +86,30 @@ function App() {
 
   const cartCount = (cartItems || []).reduce((sum, item) => sum + item.quantity, 0)
 
-  // Load featured products from Square for the Home Featured Collection
-  const loadFeaturedFromSquare = async () => {
-    try {
-      // Fetch featured products from Square
-      const { data } = await squareService.getFeaturedProducts(6)
-      const converted = data.map(convertSquareProduct)
-      if (converted.length > 0) {
-        setFeaturedProducts(converted)
-      }
-    } catch (err) {
-      console.error('Failed to load Square featured products:', err)
-      // Graceful fallback: keep existing local featuredProducts
-    }
-  }
-
-  // Fetch on first mount
-  useState(() => {
-    // Slight delay to allow initial render, avoid blocking
-    setTimeout(() => {
-      loadFeaturedFromSquare()
-    }, 0)
-    return undefined
-  })
-
-  // Get current background image
   const currentBackground = backgrounds[currentPage as PageType] || backgrounds.home
 
   return (
     <CurrencyProvider>
-    <div className="min-h-screen flex flex-col text-foreground relative">
-      {/* Dynamic background */}
-      <div 
-        className="page-background"
-        style={{
-          backgroundImage: `url(${currentBackground})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          backgroundAttachment: 'fixed'
-        }}
-      ></div>
-      
-      <Navbar
-        cartCount={cartCount}
-        onCartClick={() => setCartOpen(true)}
-        currentPage={currentPage}
-        onNavigate={setCurrentPage}
-      />
+      <div className="min-h-screen flex flex-col text-foreground relative">
+        <div 
+          className="page-background"
+          style={{
+            backgroundImage: `url(${currentBackground})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            backgroundAttachment: 'fixed'
+          }}
+        ></div>
+        
+        <Navbar
+          cartCount={cartCount}
+          onCartClick={() => setCartOpen(true)}
+          currentPage={currentPage}
+          onNavigate={setCurrentPage}
+        />
 
-    {currentPage === 'home' && (
+        {currentPage === 'home' && (
           <HomePage
             onNavigate={setCurrentPage}
             onAddToCart={handleAddToCart}
@@ -147,28 +137,29 @@ function App() {
         {currentPage === 'account' && <AccountPage />}
 
         {currentPage === 'minecraft-shop' && <TebexProducts />}
-      <Footer />
+        
+        <Footer />
 
-     <CartDrawer
-        open={cartOpen}
-        onOpenChange={setCartOpen} // Match the prop from your file
-        items={cartItems}
-        onUpdateQuantity={handleUpdateQuantity}
-        onRemoveItem={handleRemoveItem}
-        onCheckout={() => {
-          setCurrentPage('checkout')
-        }}
-      />
+        <CartDrawer
+          open={cartOpen}
+          onOpenChange={setCartOpen}
+          items={cartItems}
+          onUpdateQuantity={handleUpdateQuantity}
+          onRemoveItem={handleRemoveItem}
+          onCheckout={() => {
+            setCurrentPage('checkout')
+          }}
+        />
 
-      <ProductDetailModal
-        product={selectedProduct}
-        open={selectedProduct !== null}
-        onOpenChange={(open) => !open && setSelectedProduct(null)}
-        onAddToCart={handleAddToCart}
-      />
+        <ProductDetailModal
+          product={selectedProduct}
+          open={selectedProduct !== null}
+          onOpenChange={(open) => !open && setSelectedProduct(null)}
+          onAddToCart={handleAddToCart}
+        />
 
-      <Toaster position="top-right" richColors />
-    </div>
+        <Toaster position="top-right" richColors />
+      </div>
     </CurrencyProvider>
   )
 }
