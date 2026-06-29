@@ -66,7 +66,7 @@ export default async function handler(req: any, res: any) {
     }
 
     const data = await response.json()
-    
+
     // Build a map of image_id -> image URL
     const imageMap = new Map<string, string>()
     const allObjects = Array.isArray(data.objects) ? data.objects : []
@@ -77,16 +77,17 @@ export default async function handler(req: any, res: any) {
     }
 
     const items = allObjects.filter((obj: any) => obj.type === 'ITEM') || []
-    
-    const products: SquareProduct[] = items.map((item: any) => {
+
+    // Process all products, with fallback fetches for missing images
+    const products: SquareProduct[] = await Promise.all(items.map(async (item: any) => {
       const itemData = item.item_data
       const variations = itemData?.variations || []
-      
+
       const baseVariation = variations[0]
       const baseMoney = baseVariation?.item_variation_data?.price_money
       const basePrice = baseMoney ? baseMoney.amount / 100 : 0
 
-      // Extract images - check item level first, then variation level as fallback
+      // Extract images - check item level first
       const imageIds: string[] = itemData?.image_ids || []
       let images = imageIds.map((id: string) => imageMap.get(id)).filter(Boolean) as string[]
 
@@ -99,16 +100,43 @@ export default async function handler(req: any, res: any) {
         }
       }
 
+      // Fallback: fetch full catalog object which includes related_objects with images
+      if (images.length === 0) {
+        try {
+          const objRes = await fetch(
+            `https://connect.squareup.com/v2/catalog/object/${item.id}`,
+            {
+              headers: {
+                'Authorization': `Bearer ${SQUARE_ACCESS_TOKEN}`,
+                'Square-Version': '2023-12-13'
+              }
+            }
+          )
+          if (objRes.ok) {
+            const objData = await objRes.json()
+            const related = Array.isArray(objData.related_objects) ? objData.related_objects : []
+            const fallbackMap = new Map<string, string>()
+            for (const obj of related) {
+              if (obj?.type === 'IMAGE' && obj?.image_data?.url && obj?.id) {
+                fallbackMap.set(obj.id, obj.image_data.url)
+              }
+            }
+            const fallbackIds: string[] = objData.object?.item_data?.image_ids || []
+            const fallbackImages = fallbackIds.map((id: string) => fallbackMap.get(id)).filter(Boolean) as string[]
+            if (fallbackImages.length > 0) images = fallbackImages
+          }
+        } catch (_) {}
+      }
+
       const primaryImage = images[0] || 'https://placehold.co/400x600/1a1a1a/666666?text=No+Image'
-      
+
       const categoryId = itemData?.category_id
       const category = categoryId ? 'General' : 'Uncategorized'
-      
+
       const productVariations = variations.map((variation: any) => {
         const variationData = variation.item_variation_data
         const priceMoney = variationData?.price_money
         const price = priceMoney ? priceMoney.amount / 100 : 0
-        
         return {
           id: variation.id,
           name: variationData?.name || 'Default',
@@ -120,7 +148,7 @@ export default async function handler(req: any, res: any) {
           }
         }
       })
-      
+
       return {
         id: item.id,
         name: itemData?.name || 'Unnamed Product',
@@ -137,10 +165,10 @@ export default async function handler(req: any, res: any) {
         sku: baseVariation?.item_variation_data?.sku || item.id,
         variations: productVariations
       }
-    })
+    }))
 
     let filteredProducts = products
-    
+
     const query = req.query || {}
     const search = query.search
     const category = query.category
