@@ -1,12 +1,9 @@
-﻿import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { ProductCard } from '@/components/ProductCard'
 import { Product } from '@/lib/types'
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { MagnifyingGlass, CircleNotch, Warning } from '@phosphor-icons/react'
-import { squareService, convertSquareProduct } from '@/lib/square'
-import { products as fallbackProducts } from '@/lib/products'
 
 interface ShopPageProps {
   onAddToCart: (product: Product) => void
@@ -24,23 +21,16 @@ export function ShopPage({ onAddToCart, onViewDetails }: ShopPageProps) {
   }, [])
 
   const loadProducts = async () => {
-    console.log('🔄 Loading products from Square...')
     setLoading(true)
     setError(null)
-    
     try {
-      console.log('📡 Calling API: /api/products?limit=100')
-      const response = await squareService.getProducts({ limit: 100 })
-      console.log('✅ API Response:', response)
-      console.log('📦 Products received:', response.data.length)
-      
-      const convertedProducts = response.data.map(convertSquareProduct)
-      console.log('✨ Setting Square products:', convertedProducts.length)
-      setProducts(convertedProducts)
-      
+      const response = await fetch('/api/gelato/products')
+      if (!response.ok) throw new Error(`HTTP ${response.status}`)
+      const data = await response.json()
+      setProducts(data.data || [])
     } catch (err: any) {
-      console.error('❌ Failed to load products from Square:', err)
-      setError(`Failed to load products from Square: ${err.message}`)
+      console.error('Failed to load Gelato products:', err)
+      setError(`Failed to load products: ${err.message}`)
       setProducts([])
     } finally {
       setLoading(false)
@@ -49,7 +39,7 @@ export function ShopPage({ onAddToCart, onViewDetails }: ShopPageProps) {
 
   const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.description.toLowerCase().includes(searchTerm.toLowerCase())
+    (product.description || '').toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   if (loading) {
@@ -57,7 +47,7 @@ export function ShopPage({ onAddToCart, onViewDetails }: ShopPageProps) {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <CircleNotch className="mx-auto mb-4 h-8 w-8 animate-spin text-primary" />
-          <p className="text-lg">Loading products from Square...</p>
+          <p className="text-lg">Loading products...</p>
         </div>
       </div>
     )
@@ -69,7 +59,7 @@ export function ShopPage({ onAddToCart, onViewDetails }: ShopPageProps) {
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold mb-4">Our Shop</h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Discover amazing products powered by Square Catalog API
+            Discover our collection of premium anime posters
           </p>
         </div>
 
@@ -106,7 +96,7 @@ export function ShopPage({ onAddToCart, onViewDetails }: ShopPageProps) {
           ))}
         </div>
 
-        {filteredProducts.length === 0 && (
+        {filteredProducts.length === 0 && !loading && (
           <div className="text-center py-12">
             <p className="text-lg text-muted-foreground">No products found matching your search.</p>
           </div>
