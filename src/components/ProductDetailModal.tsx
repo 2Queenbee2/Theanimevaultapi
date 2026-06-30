@@ -2,9 +2,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Product } from '@/lib/types'
-import { useState, useMemo } from 'react'
-import { ShoppingCart, Star, Package, ShieldCheck } from '@phosphor-icons/react'
+import { useState, useMemo, useEffect } from 'react'
+import { ShoppingCart, Star, Package, ShieldCheck, Heart } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
+import { supabase } from '@/lib/supabase'
+import { toast } from 'sonner'
 
 interface ProductDetailModalProps {
   product: Product | null
@@ -15,12 +17,82 @@ interface ProductDetailModalProps {
 
 export function ProductDetailModal({ product, open, onOpenChange, onAddToCart }: ProductDetailModalProps) {
   const [selectedVariationId, setSelectedVariationId] = useState<string | undefined>(undefined)
+  const [isFavourited, setIsFavourited] = useState(false)
+  const [favLoading, setFavLoading] = useState(false)
+  const [userId, setUserId] = useState<string | null>(null)
+
   const selectedVariation = useMemo(() => {
     if (!product?.variations || !selectedVariationId) return undefined
     return product.variations.find(v => v.id === selectedVariationId)
   }, [product, selectedVariationId])
 
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setUserId(session.user.id)
+        if (product) checkFavourited(session.user.id, product.id)
+      }
+    })
+  }, [product?.id])
+
+  const checkFavourited = async (uid: string, productId: string) => {
+    const { data } = await supabase
+      .from('favourites')
+      .select('id')
+      .eq('user_id', uid)
+      .eq('product_id', productId)
+      .single()
+    setIsFavourited(!!data)
+  }
+
+  const handleFavourite = async () => {
+    if (!userId) {
+      toast.info('Sign in to save favourites!')
+      return
+    }
+    if (!product) return
+
+    setFavLoading(true)
+
+    if (isFavourited) {
+      await supabase
+        .from('favourites')
+        .delete()
+        .eq('user_id', userId)
+        .eq('product_id', product.id)
+      setIsFavourited(false)
+      toast.success('Removed from favourites')
+    } else {
+      const { error } = await supabase
+        .from('favourites')
+        .insert({
+          user_id: userId,
+          product_id: product.id,
+          product_name: product.name,
+          product_image: product.image,
+          product_price: product.price,
+          fulfillment: (product as any).fulfillment || 'printify'
+        })
+      if (error) {
+        toast.error('Failed to save favourite')
+      } else {
+        setIsFavourited(true)
+        toast.success('Added to favourites! ❤️')
+      }
+    }
+
+    setFavLoading(false)
+  }
+
   if (!product) return null
+
+  const displayPrice = selectedVariation ? selectedVariation.price : product.price
+
+  // Strip HTML tags from description
+  const cleanDescription = (product.description || '')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<[^>]+>/g, '')
+    .trim()
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -48,13 +120,28 @@ export function ProductDetailModal({ product, open, onOpenChange, onAddToCart }:
 
           <div className="space-y-6">
             <div>
-              <div className="flex items-center gap-2 mb-2">
-                <Badge variant="outline" className="border-gold/50 text-gold">
-                  {product.category}
-                </Badge>
-                {!product.inStock && (
-                  <Badge variant="destructive">Out of Stock</Badge>
-                )}
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="border-gold/50 text-gold">
+                    {product.category}
+                  </Badge>
+                  {!product.inStock && (
+                    <Badge variant="destructive">Out of Stock</Badge>
+                  )}
+                </div>
+                {/* Heart button */}
+                <button
+                  onClick={handleFavourite}
+                  disabled={favLoading}
+                  className={cn(
+                    "w-10 h-10 rounded-full flex items-center justify-center transition-all border",
+                    isFavourited
+                      ? "bg-red-500 border-red-500 text-white"
+                      : "bg-background border-border text-muted-foreground hover:border-red-500 hover:text-red-500"
+                  )}
+                >
+                  <Heart weight={isFavourited ? "fill" : "bold"} size={20} />
+                </button>
               </div>
 
               <div className="flex items-center gap-1 mb-4">
@@ -74,7 +161,7 @@ export function ProductDetailModal({ product, open, onOpenChange, onAddToCart }:
               </div>
 
               <div className="text-4xl font-bold text-gold mb-6">
-                ${selectedVariation ? selectedVariation.price : product.price}
+                ${Number(displayPrice).toFixed(2)}
               </div>
 
               {/* Variations */}
@@ -96,14 +183,13 @@ export function ProductDetailModal({ product, open, onOpenChange, onAddToCart }:
                 </div>
               )}
 
-              <p className="text-muted-foreground leading-relaxed mb-6">
-                {product.description}
+              <p className="text-muted-foreground leading-relaxed mb-6 whitespace-pre-line">
+                {cleanDescription}
               </p>
 
               <Button
                 size="lg"
                 onClick={() => {
-                  // Optionally, attach variation info to product name for cart context
                   const p = selectedVariation
                     ? { ...product, name: `${product.name} - ${selectedVariation.name}`, price: selectedVariation.price }
                     : product
@@ -129,7 +215,7 @@ export function ProductDetailModal({ product, open, onOpenChange, onAddToCart }:
               </div>
               <div className="flex items-center gap-3 text-sm">
                 <Star weight="bold" className="text-gold" />
-                <span className="text-muted-foreground">Premium quality collectible</span>
+                <span className="text-muted-foreground">Earn 1 point per $1 spent!</span>
               </div>
             </div>
           </div>
