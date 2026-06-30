@@ -42,23 +42,12 @@ export function Footer() {
                   Community Discord
                 </a>
               </li>
-              <li>
-                <button 
-                  onClick={() => {
-                    const modal = document.getElementById('contact-modal')
-                    if (modal) modal.style.display = 'flex'
-                  }}
-                  className="hover:text-gold cursor-pointer transition-colors text-left"
-                >
-                  Contact Us
-                </button>
-              </li>
             </ul>
           </div>
 
-          {/* Get In Touch */}
+          {/* Contact Us */}
           <div className="space-y-4">
-            <h3 className="font-semibold text-foreground">Get In Touch</h3>
+            <h3 className="font-semibold text-foreground">Contact Us</h3>
             <div className="space-y-3">
               <a 
                 href="mailto:theanimevault.official2025@gmail.com"
@@ -156,63 +145,6 @@ export function Footer() {
             <div className="border-t border-gold/20 pt-4 text-center">
               <p className="text-white font-bold text-lg">Welcome to The Anime Vault.</p>
             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Contact Modal */}
-      <div 
-        id="contact-modal"
-        style={{ display: 'none' }}
-        className="fixed inset-0 z-50 items-center justify-center bg-black/70 backdrop-blur-sm p-4"
-        onClick={(e) => {
-          if (e.target === e.currentTarget) {
-            const modal = document.getElementById('contact-modal')
-            if (modal) modal.style.display = 'none'
-          }
-        }}
-      >
-        <div className="bg-card border border-gold/20 rounded-2xl p-8 max-w-md w-full">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold gradient-text-primary">Contact Us</h2>
-            <button 
-              onClick={() => {
-                const modal = document.getElementById('contact-modal')
-                if (modal) modal.style.display = 'none'
-              }}
-              className="text-white/50 hover:text-white text-2xl"
-            >
-              ✕
-            </button>
-          </div>
-          
-          <div className="space-y-6 text-sm text-muted-foreground">
-            <p>Have a question or just want to say hi? We'd love to hear from you!</p>
-            
-            <div className="bg-black/30 rounded-xl p-4 border border-gold/20">
-              <p className="text-white font-medium mb-1">📧 Email Us</p>
-              <a 
-                href="mailto:theanimevault.official2025@gmail.com"
-                className="text-gold hover:underline break-all"
-              >
-                theanimevault.official2025@gmail.com
-              </a>
-            </div>
-
-            <div className="bg-black/30 rounded-xl p-4 border border-gold/20">
-              <p className="text-white font-medium mb-1">💬 Join Our Discord</p>
-              <a 
-                href="https://discord.gg/HZ33WY4RdH" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-gold hover:underline"
-              >
-                discord.gg/HZ33WY4RdH
-              </a>
-              <p className="text-xs mt-1">Fastest way to get a response!</p>
-            </div>
-
-            <p className="text-xs">We typically respond within 24–48 hours.</p>
           </div>
         </div>
       </div>
