@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { ShoppingCart, Star, Heart } from '@phosphor-icons/react'
 import { Card } from '@/components/ui/card'
@@ -6,6 +7,8 @@ import { Badge } from '@/components/ui/badge'
 import { Product } from '@/lib/types'
 import { useCurrency } from '@/lib/currency'
 import { cn } from '@/lib/utils'
+import { supabase } from '@/lib/supabase'
+import { toast } from 'sonner'
 
 interface ProductCardProps {
   product: Product
@@ -15,6 +18,72 @@ interface ProductCardProps {
 
 export function ProductCard({ product, onAddToCart, onViewDetails }: ProductCardProps) {
   const { format } = useCurrency()
+  const [isFavourited, setIsFavourited] = useState(false)
+  const [favLoading, setFavLoading] = useState(false)
+  const [userId, setUserId] = useState<string | null>(null)
+
+  useEffect(() => {
+    // Get current user
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setUserId(session.user.id)
+        checkFavourited(session.user.id)
+      }
+    })
+  }, [product.id])
+
+  const checkFavourited = async (uid: string) => {
+    const { data } = await supabase
+      .from('favourites')
+      .select('id')
+      .eq('user_id', uid)
+      .eq('product_id', product.id)
+      .single()
+    setIsFavourited(!!data)
+  }
+
+  const handleFavourite = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+
+    if (!userId) {
+      toast.info('Sign in to save favourites!')
+      return
+    }
+
+    setFavLoading(true)
+
+    if (isFavourited) {
+      // Remove from favourites
+      await supabase
+        .from('favourites')
+        .delete()
+        .eq('user_id', userId)
+        .eq('product_id', product.id)
+      setIsFavourited(false)
+      toast.success('Removed from favourites')
+    } else {
+      // Add to favourites
+      const { error } = await supabase
+        .from('favourites')
+        .insert({
+          user_id: userId,
+          product_id: product.id,
+          product_name: product.name,
+          product_image: product.image,
+          product_price: product.price,
+          fulfillment: (product as any).fulfillment || 'printify'
+        })
+      if (error) {
+        toast.error('Failed to save favourite')
+      } else {
+        setIsFavourited(true)
+        toast.success('Added to favourites! ❤️')
+      }
+    }
+
+    setFavLoading(false)
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -47,8 +116,17 @@ export function ProductCard({ product, onAddToCart, onViewDetails }: ProductCard
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
           />
           
-          <button className="absolute top-3 right-3 z-20 w-10 h-10 rounded-full bg-background/80 backdrop-blur flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:bg-gold hover:text-gold-foreground">
-            <Heart weight="bold" size={20} />
+          <button
+            onClick={handleFavourite}
+            disabled={favLoading}
+            className={cn(
+              "absolute top-3 right-3 z-20 w-10 h-10 rounded-full backdrop-blur flex items-center justify-center transition-all",
+              isFavourited
+                ? "bg-red-500 text-white opacity-100"
+                : "bg-background/80 text-white opacity-0 group-hover:opacity-100 hover:bg-red-500 hover:text-white"
+            )}
+          >
+            <Heart weight={isFavourited ? "fill" : "bold"} size={20} />
           </button>
         </div>
 
