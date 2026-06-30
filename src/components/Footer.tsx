@@ -1,4 +1,4 @@
-import { DiscordLogo, TwitterLogo, InstagramLogo, YoutubeLogo, EnvelopeSimple } from '@phosphor-icons/react'
+import { DiscordLogo, EnvelopeSimple } from '@phosphor-icons/react'
 import logoImage from '@/assets/logo/New Logo.png'
 
 export function Footer() {
@@ -66,24 +66,6 @@ export function Footer() {
                 discord.gg/HZ33WY4RdH
               </a>
             </div>
-
-            {/* Social Icons */}
-            <div className="flex gap-3 pt-2">
-              <a href="https://discord.gg/HZ33WY4RdH" target="_blank" rel="noopener noreferrer">
-                <button className="w-9 h-9 rounded-lg bg-secondary hover:bg-indigo-500/20 hover:text-indigo-400 transition-all flex items-center justify-center">
-                  <DiscordLogo size={18} weight="fill" />
-                </button>
-              </a>
-              <button className="w-9 h-9 rounded-lg bg-secondary hover:bg-sky-500/20 hover:text-sky-400 transition-all flex items-center justify-center">
-                <TwitterLogo size={18} weight="fill" />
-              </button>
-              <button className="w-9 h-9 rounded-lg bg-secondary hover:bg-pink-500/20 hover:text-pink-400 transition-all flex items-center justify-center">
-                <InstagramLogo size={18} weight="fill" />
-              </button>
-              <button className="w-9 h-9 rounded-lg bg-secondary hover:bg-red-500/20 hover:text-red-400 transition-all flex items-center justify-center">
-                <YoutubeLogo size={18} weight="fill" />
-              </button>
-            </div>
           </div>
         </div>
 
@@ -128,26 +110,4 @@ export function Footer() {
             <p>We're building an anime ecosystem where fans can connect beyond shopping through our Discord community, events, giveaways, and our custom Minecraft server.</p>
 
             <div className="border-t border-gold/20 pt-4">
-              <h3 className="text-white font-bold mb-3">Our Vision</h3>
-              <p>To become a trusted home for anime fans by combining exceptional merchandise, engaging communities, and unique experiences into one connected destination.</p>
-            </div>
-
-            <div className="border-t border-gold/20 pt-4">
-              <h3 className="text-white font-bold mb-3">What We Stand For</h3>
-              <ul className="space-y-2">
-                <li><span className="text-gold font-medium">Quality Without Compromise</span> — Every product should meet a standard we're proud to put our name on.</li>
-                <li><span className="text-gold font-medium">Built for Fans</span> — Everything we create begins with a genuine appreciation for anime.</li>
-                <li><span className="text-gold font-medium">Community at Our Core</span> — Whether shopping, chatting in Discord, or exploring our Minecraft server, you're part of The Anime Vault.</li>
-                <li><span className="text-gold font-medium">Always Evolving</span> — Anime never stands still, and neither do we.</li>
-              </ul>
-            </div>
-
-            <div className="border-t border-gold/20 pt-4 text-center">
-              <p className="text-white font-bold text-lg">Welcome to The Anime Vault.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </footer>
-  )
-}
+              <h3 className="text-white font-bold
