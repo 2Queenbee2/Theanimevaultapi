@@ -17,7 +17,6 @@ export function AccountPage() {
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login')
   const [showPassword, setShowPassword] = useState(false)
 
-  // Auth form state
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [username, setUsername] = useState('')
@@ -25,13 +24,11 @@ export function AccountPage() {
   const [lastName, setLastName] = useState('')
   const [authLoading, setAuthLoading] = useState(false)
 
-  // Profile edit state
   const [editUsername, setEditUsername] = useState('')
   const [editFirstName, setEditFirstName] = useState('')
   const [editLastName, setEditLastName] = useState('')
 
   useEffect(() => {
-    // Check current session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null)
       if (session?.user) {
@@ -42,7 +39,6 @@ export function AccountPage() {
       setLoading(false)
     })
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
       if (session?.user) {
@@ -60,7 +56,7 @@ export function AccountPage() {
   }, [])
 
   const loadProfile = async (userId: string) => {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('profiles')
       .select('*')
       .eq('id', userId)
@@ -166,7 +162,6 @@ export function AccountPage() {
     )
   }
 
-  // NOT LOGGED IN — Show login/signup form
   if (!user) {
     return (
       <div className="min-h-screen py-12 bg-black/20 backdrop-blur-sm">
@@ -182,7 +177,6 @@ export function AccountPage() {
             <p className="text-white/70 mb-8">Sign in to track orders, earn points, and save favourites</p>
 
             <Card className="p-8 bg-black/40 backdrop-blur-sm border-gold/20">
-              {/* Toggle */}
               <div className="flex rounded-lg overflow-hidden border border-gold/20 mb-6">
                 <button
                   onClick={() => setAuthMode('login')}
@@ -277,7 +271,7 @@ export function AccountPage() {
 
                 {authMode === 'signup' && (
                   <p className="text-xs text-white/50 text-center">
-                    By creating an account you agree to our terms. You'll earn points on every purchase!
+                    By creating an account you agree to our terms. You'll earn 100 bonus points on signup plus 1 point for every $1 spent!
                   </p>
                 )}
               </div>
@@ -288,7 +282,6 @@ export function AccountPage() {
     )
   }
 
-  // LOGGED IN — Show account dashboard
   return (
     <div className="min-h-screen py-12 bg-black/20 backdrop-blur-sm">
       <div className="container mx-auto px-6">
@@ -313,12 +306,12 @@ export function AccountPage() {
               <div>
                 <p className="text-white/70 text-sm">Your Points Balance</p>
                 <p className="text-4xl font-bold text-gold">{profile?.points || 0}</p>
-                <p className="text-white/50 text-xs">100 points = $1.00 CAD off your next order</p>
+                <p className="text-white/50 text-xs">50 points = $1.00 CAD off your next order</p>
               </div>
             </div>
             <div className="text-right">
               <p className="text-white/70 text-sm">Points Value</p>
-              <p className="text-2xl font-bold text-white">${((profile?.points || 0) / 100).toFixed(2)} CAD</p>
+              <p className="text-2xl font-bold text-white">${((profile?.points || 0) / 50).toFixed(2)} CAD</p>
               <p className="text-white/50 text-xs">Redeemable at checkout</p>
             </div>
           </div>
@@ -502,7 +495,7 @@ export function AccountPage() {
                   <div className="p-4 border border-gold/20 rounded-lg">
                     <h3 className="font-semibold text-white mb-1">Points Balance</h3>
                     <p className="text-gold font-bold">{profile?.points || 0} points</p>
-                    <p className="text-white/50 text-xs mt-1">Earn 1 point for every $1 spent</p>
+                    <p className="text-white/50 text-xs mt-1">50 points = $1.00 CAD off • Earn 1 point per $1 spent</p>
                   </div>
                 </div>
 
