@@ -20,29 +20,15 @@ export function Footer() {
             <p className="text-sm text-muted-foreground">
               Your premier destination for authentic anime merchandise, community, and experiences.
             </p>
-          </div>
-
-          {/* Company */}
-          <div className="space-y-4">
-            <h3 className="font-semibold text-foreground">Company</h3>
-            <ul className="space-y-3 text-sm text-muted-foreground">
-              <li>
-                <button 
-                  onClick={() => {
-                    const modal = document.getElementById('about-modal')
-                    if (modal) modal.style.display = 'flex'
-                  }}
-                  className="hover:text-gold cursor-pointer transition-colors text-left"
-                >
-                  About Us
-                </button>
-              </li>
-              <li>
-                <a href="https://discord.gg/HZ33WY4RdH" target="_blank" rel="noopener noreferrer" className="hover:text-gold transition-colors">
-                  Community Discord
-                </a>
-              </li>
-            </ul>
+            <button
+              onClick={() => {
+                const modal = document.getElementById('about-modal')
+                if (modal) modal.style.display = 'flex'
+              }}
+              className="px-5 py-2 rounded-lg border border-gold/30 text-sm text-white hover:bg-gold/10 hover:border-gold transition-all"
+            >
+              About Us
+            </button>
           </div>
 
           {/* Contact Us */}
@@ -67,6 +53,9 @@ export function Footer() {
               </a>
             </div>
           </div>
+
+          {/* Empty column for spacing */}
+          <div />
         </div>
 
         {/* Bottom Bar */}
