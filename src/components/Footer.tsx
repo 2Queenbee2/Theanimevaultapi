@@ -20,31 +20,6 @@ export function Footer() {
             <p className="text-sm text-muted-foreground">
               Your premier destination for authentic anime merchandise, community, and experiences.
             </p>
-            <div className="flex gap-3 flex-wrap pt-2">
-              <a href="https://discord.gg/HZ33WY4RdH" target="_blank" rel="noopener noreferrer">
-                <button className="w-10 h-10 rounded-lg bg-secondary hover:bg-indigo-500/20 hover:text-indigo-400 transition-all flex items-center justify-center">
-                  <DiscordLogo size={20} weight="fill" />
-                </button>
-              </a>
-              <button className="w-10 h-10 rounded-lg bg-secondary hover:bg-sky-500/20 hover:text-sky-400 transition-all flex items-center justify-center">
-                <TwitterLogo size={20} weight="fill" />
-              </button>
-              <button className="w-10 h-10 rounded-lg bg-secondary hover:bg-pink-500/20 hover:text-pink-400 transition-all flex items-center justify-center">
-                <InstagramLogo size={20} weight="fill" />
-              </button>
-              <button className="w-10 h-10 rounded-lg bg-secondary hover:bg-red-500/20 hover:text-red-400 transition-all flex items-center justify-center">
-                <YoutubeLogo size={20} weight="fill" />
-              </button>
-              <button 
-                onClick={() => {
-                  const modal = document.getElementById('contact-modal')
-                  if (modal) modal.style.display = 'flex'
-                }}
-                className="w-10 h-10 rounded-lg bg-secondary hover:bg-gold/20 hover:text-gold transition-all flex items-center justify-center"
-              >
-                <EnvelopeSimple size={20} weight="fill" />
-              </button>
-            </div>
           </div>
 
           {/* Company */}
@@ -81,39 +56,44 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Contact Info */}
+          {/* Get In Touch */}
           <div className="space-y-4">
             <h3 className="font-semibold text-foreground">Get In Touch</h3>
             <div className="space-y-3">
-              <div className="flex items-start gap-3">
-                <EnvelopeSimple size={18} className="text-gold mt-0.5 shrink-0" />
-                <div>
-                  <p className="text-xs text-muted-foreground mb-0.5">Email</p>
-                  <a 
-                    href="mailto:theanimevault.official2025@gmail.com"
-                    className="text-sm text-white hover:text-gold transition-colors break-all"
-                  >
-                    theanimevault.official2025@gmail.com
-                  </a>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <DiscordLogo size={18} className="text-indigo-400 mt-0.5 shrink-0" />
-                <div>
-                  <p className="text-xs text-muted-foreground mb-0.5">Discord Community</p>
-                  <a 
-                    href="https://discord.gg/HZ33WY4RdH" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-sm text-white hover:text-gold transition-colors"
-                  >
-                    discord.gg/HZ33WY4RdH
-                  </a>
-                </div>
-              </div>
-              <p className="text-xs text-muted-foreground pt-2">
-                We typically respond within 24–48 hours.
-              </p>
+              <a 
+                href="mailto:theanimevault.official2025@gmail.com"
+                className="flex items-center gap-3 text-sm text-white hover:text-gold transition-colors"
+              >
+                <EnvelopeSimple size={18} className="text-gold shrink-0" />
+                theanimevault.official2025@gmail.com
+              </a>
+              <a 
+                href="https://discord.gg/HZ33WY4RdH" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 text-sm text-white hover:text-gold transition-colors"
+              >
+                <DiscordLogo size={18} className="text-indigo-400 shrink-0" />
+                discord.gg/HZ33WY4RdH
+              </a>
+            </div>
+
+            {/* Social Icons */}
+            <div className="flex gap-3 pt-2">
+              <a href="https://discord.gg/HZ33WY4RdH" target="_blank" rel="noopener noreferrer">
+                <button className="w-9 h-9 rounded-lg bg-secondary hover:bg-indigo-500/20 hover:text-indigo-400 transition-all flex items-center justify-center">
+                  <DiscordLogo size={18} weight="fill" />
+                </button>
+              </a>
+              <button className="w-9 h-9 rounded-lg bg-secondary hover:bg-sky-500/20 hover:text-sky-400 transition-all flex items-center justify-center">
+                <TwitterLogo size={18} weight="fill" />
+              </button>
+              <button className="w-9 h-9 rounded-lg bg-secondary hover:bg-pink-500/20 hover:text-pink-400 transition-all flex items-center justify-center">
+                <InstagramLogo size={18} weight="fill" />
+              </button>
+              <button className="w-9 h-9 rounded-lg bg-secondary hover:bg-red-500/20 hover:text-red-400 transition-all flex items-center justify-center">
+                <YoutubeLogo size={18} weight="fill" />
+              </button>
             </div>
           </div>
         </div>
@@ -153,16 +133,12 @@ export function Footer() {
           
           <div className="space-y-4 text-sm text-muted-foreground leading-relaxed">
             <p>Anime is more than entertainment—it's art, storytelling, and a culture that brings millions of people together. <span className="text-white font-medium">The Anime Vault was built to celebrate that passion.</span></p>
-            
-            <p>We're creating a destination where anime fans can discover premium merchandise inspired by the worlds they love, while becoming part of a community that values creativity, quality, and authenticity. Every collection we release is guided by a simple philosophy: create products that fans are genuinely excited to own—not just another item on a shelf.</p>
-            
-            <p>Quality comes first. From the materials we choose to the designs we create and the experience we deliver, every detail matters. We believe anime merchandise should feel meaningful—something that reflects the stories, characters, and moments that inspire us.</p>
-            
+            <p>We're creating a destination where anime fans can discover premium merchandise inspired by the worlds they love, while becoming part of a community that values creativity, quality, and authenticity.</p>
+            <p>Quality comes first. From the materials we choose to the designs we create and the experience we deliver, every detail matters.</p>
             <p className="text-white font-medium">But The Anime Vault is more than a store.</p>
-            
-            <p>We're building an anime ecosystem where fans can connect beyond shopping. Our Discord community brings together collectors, creators, gamers, and anime enthusiasts from around the world through discussions, events, giveaways, and exclusive community experiences.</p>
+            <p>We're building an anime ecosystem where fans can connect beyond shopping through our Discord community, events, giveaways, and our custom Minecraft server.</p>
 
-            <div className="border-t border-gold/20 pt-4 mt-4">
+            <div className="border-t border-gold/20 pt-4">
               <h3 className="text-white font-bold mb-3">Our Vision</h3>
               <p>To become a trusted home for anime fans by combining exceptional merchandise, engaging communities, and unique experiences into one connected destination.</p>
             </div>
@@ -171,8 +147,8 @@ export function Footer() {
               <h3 className="text-white font-bold mb-3">What We Stand For</h3>
               <ul className="space-y-2">
                 <li><span className="text-gold font-medium">Quality Without Compromise</span> — Every product should meet a standard we're proud to put our name on.</li>
-                <li><span className="text-gold font-medium">Built for Fans</span> — Everything we create begins with a genuine appreciation for anime and the people who love it.</li>
-                <li><span className="text-gold font-medium">Community at Our Core</span> — Whether you're shopping, chatting in Discord, or exploring our Minecraft server, you're part of The Anime Vault.</li>
+                <li><span className="text-gold font-medium">Built for Fans</span> — Everything we create begins with a genuine appreciation for anime.</li>
+                <li><span className="text-gold font-medium">Community at Our Core</span> — Whether shopping, chatting in Discord, or exploring our Minecraft server, you're part of The Anime Vault.</li>
                 <li><span className="text-gold font-medium">Always Evolving</span> — Anime never stands still, and neither do we.</li>
               </ul>
             </div>
@@ -211,7 +187,7 @@ export function Footer() {
           </div>
           
           <div className="space-y-6 text-sm text-muted-foreground">
-            <p>Have a question, concern, or just want to say hi? We'd love to hear from you!</p>
+            <p>Have a question or just want to say hi? We'd love to hear from you!</p>
             
             <div className="bg-black/30 rounded-xl p-4 border border-gold/20">
               <p className="text-white font-medium mb-1">📧 Email Us</p>
