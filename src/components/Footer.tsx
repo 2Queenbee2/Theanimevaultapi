@@ -8,7 +8,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           
           {/* Brand */}
-          <div className="space-y-4 flex flex-col items-center text-center">
+          <div className="space-y-4">
             <div className="flex items-center gap-2">
               <img 
                 src={logoImage} 
@@ -20,18 +20,22 @@ export function Footer() {
             <p className="text-sm text-muted-foreground">
               Your premier destination for authentic anime merchandise, community, and experiences.
             </p>
+          </div>
+
+          {/* About Us - Center */}
+          <div className="flex items-center justify-center">
             <button
               onClick={() => {
                 const modal = document.getElementById('about-modal')
                 if (modal) modal.style.display = 'flex'
               }}
-              className="px-5 py-2 rounded-lg border border-gold/30 text-sm text-white hover:bg-gold/10 hover:border-gold transition-all"
+              className="px-6 py-2 rounded-lg border border-gold/30 text-sm text-white hover:bg-gold/10 hover:border-gold transition-all"
             >
               About Us
             </button>
           </div>
 
-          {/* Contact Us */}
+          {/* Contact Us - Right */}
           <div className="space-y-4">
             <h3 className="font-semibold text-foreground">Contact Us</h3>
             <div className="space-y-3">
@@ -53,9 +57,6 @@ export function Footer() {
               </a>
             </div>
           </div>
-
-          {/* Empty column for spacing */}
-          <div />
         </div>
 
         {/* Bottom Bar */}
