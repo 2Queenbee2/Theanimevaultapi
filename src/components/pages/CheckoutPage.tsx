@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
-import { CreditCard, MapPin, ShoppingBag, CheckCircle, Trash, CircleNotch, Star } from '@phosphor-icons/react'
+import { CreditCard, MapPin, ShoppingBag, CheckCircle, Trash, CircleNotch, Star, Info } from '@phosphor-icons/react'
 import { useCurrency } from '@/lib/currency'
 import { CartItem } from '@/lib/types'
 import { supabase } from '@/lib/supabase'
@@ -26,7 +26,6 @@ export function CheckoutPage({ cartItems = [], onRemoveItem }: CheckoutPageProps
   const [errorMessage, setErrorMessage] = useState('')
   const cardContainerRef = useRef<HTMLDivElement>(null)
 
-  // User & points state
   const [userId, setUserId] = useState<string | null>(null)
   const [userPoints, setUserPoints] = useState(0)
   const [pointsToRedeem, setPointsToRedeem] = useState(0)
@@ -45,17 +44,15 @@ export function CheckoutPage({ cartItems = [], onRemoveItem }: CheckoutPageProps
   const subtotal = cartItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
   const shipping = cartItems.length > 0 ? (subtotal >= 50 ? 0 : 8) : 0
   const tax = subtotal * 0.13
-  const pointsDiscount = pointsToRedeem / 50 // 50 points = $1
+  const pointsDiscount = pointsToRedeem / 50
   const total = Math.max(0, subtotal + shipping + tax - pointsDiscount)
-  const earnedPoints = Math.floor(subtotal) // 1 point per $1 spent
+  const earnedPoints = Math.floor(subtotal)
 
   useEffect(() => {
-    // Load user session and points
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         setUserId(session.user.id)
         loadUserPoints(session.user.id)
-        // Pre-fill form with profile data
         supabase
           .from('profiles')
           .select('*')
@@ -74,7 +71,6 @@ export function CheckoutPage({ cartItems = [], onRemoveItem }: CheckoutPageProps
       }
     })
 
-    // Load Square SDK
     const script = document.createElement('script')
     script.src = 'https://web.squarecdn.com/v1/square.js'
     script.onload = async () => {
@@ -149,7 +145,6 @@ export function CheckoutPage({ cartItems = [], onRemoveItem }: CheckoutPageProps
 
         const data = await response.json()
         if (data.success) {
-          // Award points and deduct redeemed points
           if (userId) {
             const newPoints = userPoints - pointsToRedeem + earnedPoints
             await supabase
@@ -157,7 +152,6 @@ export function CheckoutPage({ cartItems = [], onRemoveItem }: CheckoutPageProps
               .update({ points: newPoints })
               .eq('id', userId)
 
-            // Save order to database
             await supabase
               .from('orders')
               .insert({
@@ -223,6 +217,18 @@ export function CheckoutPage({ cartItems = [], onRemoveItem }: CheckoutPageProps
             Complete your order and join the anime vault
           </p>
         </motion.div>
+
+        {/* Account reminder banner */}
+        {!userId && (
+          <div className="max-w-6xl mx-auto mb-8">
+            <div className="bg-gold/10 border border-gold/20 rounded-xl p-4 flex items-center gap-3">
+              <Info size={20} className="text-gold shrink-0" />
+              <p className="text-sm text-white/80">
+                <span className="text-gold font-medium">Don't have an account?</span> No problem — you can still check out as a guest. But creating a free account lets you earn points on this purchase, track your orders, and save favourites!
+              </p>
+            </div>
+          </div>
+        )}
 
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
           <Card className="p-8 bg-black/40 backdrop-blur-sm border-gold/20">
@@ -295,7 +301,6 @@ export function CheckoutPage({ cartItems = [], onRemoveItem }: CheckoutPageProps
 
               <Separator className="bg-gold/20" />
 
-              {/* Points Redemption */}
               {userId && userPoints > 0 && (
                 <>
                   <div className="space-y-4">
