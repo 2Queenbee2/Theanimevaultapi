@@ -5,7 +5,7 @@ export function Footer() {
   return (
     <footer className="border-t border-border bg-black/40 backdrop-blur-md mt-auto">
       <div className="container mx-auto px-6 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           
           {/* Brand */}
           <div className="space-y-4">
@@ -20,69 +20,19 @@ export function Footer() {
             <p className="text-sm text-muted-foreground">
               Your premier destination for authentic anime merchandise, community, and experiences.
             </p>
-          </div>
-
-          {/* Shop */}
-          <div className="space-y-4">
-            <h3 className="font-semibold text-foreground">Shop</h3>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li className="hover:text-gold cursor-pointer transition-colors">Posters</li>
-              <li className="hover:text-gold cursor-pointer transition-colors">Apparel</li>
-              <li className="hover:text-gold cursor-pointer transition-colors">Accessories</li>
-              <li className="hover:text-gold cursor-pointer transition-colors">Playmats & Mouse Pads</li>
-            </ul>
-          </div>
-
-          {/* Company */}
-          <div className="space-y-4">
-            <h3 className="font-semibold text-foreground">Company</h3>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>
-                <button 
-                  onClick={() => {
-                    const modal = document.getElementById('about-modal')
-                    if (modal) modal.style.display = 'flex'
-                  }}
-                  className="hover:text-gold cursor-pointer transition-colors text-left"
-                >
-                  About Us
-                </button>
-              </li>
-              <li>
-                <a href="https://discord.gg/HZ33WY4RdH" target="_blank" rel="noopener noreferrer" className="hover:text-gold cursor-pointer transition-colors">
-                  Community
-                </a>
-              </li>
-              <li>
-                <button 
-                  onClick={() => {
-                    const modal = document.getElementById('contact-modal')
-                    if (modal) modal.style.display = 'flex'
-                  }}
-                  className="hover:text-gold cursor-pointer transition-colors text-left"
-                >
-                  Contact
-                </button>
-              </li>
-            </ul>
-          </div>
-
-          {/* Connect */}
-          <div className="space-y-4">
-            <h3 className="font-semibold text-foreground">Connect</h3>
-            <div className="flex gap-3 flex-wrap">
+            <div className="flex gap-3 flex-wrap pt-2">
               <a href="https://discord.gg/HZ33WY4RdH" target="_blank" rel="noopener noreferrer">
-                <button className="w-10 h-10 rounded-lg bg-secondary hover:bg-gold/20 hover:text-gold transition-all flex items-center justify-center">
+                <button className="w-10 h-10 rounded-lg bg-secondary hover:bg-indigo-500/20 hover:text-indigo-400 transition-all flex items-center justify-center">
                   <DiscordLogo size={20} weight="fill" />
                 </button>
               </a>
-              <button className="w-10 h-10 rounded-lg bg-secondary hover:bg-gold/20 hover:text-gold transition-all flex items-center justify-center">
+              <button className="w-10 h-10 rounded-lg bg-secondary hover:bg-sky-500/20 hover:text-sky-400 transition-all flex items-center justify-center">
                 <TwitterLogo size={20} weight="fill" />
               </button>
-              <button className="w-10 h-10 rounded-lg bg-secondary hover:bg-gold/20 hover:text-gold transition-all flex items-center justify-center">
+              <button className="w-10 h-10 rounded-lg bg-secondary hover:bg-pink-500/20 hover:text-pink-400 transition-all flex items-center justify-center">
                 <InstagramLogo size={20} weight="fill" />
               </button>
-              <button className="w-10 h-10 rounded-lg bg-secondary hover:bg-gold/20 hover:text-gold transition-all flex items-center justify-center">
+              <button className="w-10 h-10 rounded-lg bg-secondary hover:bg-red-500/20 hover:text-red-400 transition-all flex items-center justify-center">
                 <YoutubeLogo size={20} weight="fill" />
               </button>
               <button 
@@ -96,10 +46,82 @@ export function Footer() {
               </button>
             </div>
           </div>
+
+          {/* Company */}
+          <div className="space-y-4">
+            <h3 className="font-semibold text-foreground">Company</h3>
+            <ul className="space-y-3 text-sm text-muted-foreground">
+              <li>
+                <button 
+                  onClick={() => {
+                    const modal = document.getElementById('about-modal')
+                    if (modal) modal.style.display = 'flex'
+                  }}
+                  className="hover:text-gold cursor-pointer transition-colors text-left"
+                >
+                  About Us
+                </button>
+              </li>
+              <li>
+                <a href="https://discord.gg/HZ33WY4RdH" target="_blank" rel="noopener noreferrer" className="hover:text-gold transition-colors">
+                  Community Discord
+                </a>
+              </li>
+              <li>
+                <button 
+                  onClick={() => {
+                    const modal = document.getElementById('contact-modal')
+                    if (modal) modal.style.display = 'flex'
+                  }}
+                  className="hover:text-gold cursor-pointer transition-colors text-left"
+                >
+                  Contact Us
+                </button>
+              </li>
+            </ul>
+          </div>
+
+          {/* Contact Info */}
+          <div className="space-y-4">
+            <h3 className="font-semibold text-foreground">Get In Touch</h3>
+            <div className="space-y-3">
+              <div className="flex items-start gap-3">
+                <EnvelopeSimple size={18} className="text-gold mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-xs text-muted-foreground mb-0.5">Email</p>
+                  <a 
+                    href="mailto:theanimevault.official2025@gmail.com"
+                    className="text-sm text-white hover:text-gold transition-colors break-all"
+                  >
+                    theanimevault.official2025@gmail.com
+                  </a>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <DiscordLogo size={18} className="text-indigo-400 mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-xs text-muted-foreground mb-0.5">Discord Community</p>
+                  <a 
+                    href="https://discord.gg/HZ33WY4RdH" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-sm text-white hover:text-gold transition-colors"
+                  >
+                    discord.gg/HZ33WY4RdH
+                  </a>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground pt-2">
+                We typically respond within 24–48 hours.
+              </p>
+            </div>
+          </div>
         </div>
 
-        <div className="border-t border-border mt-8 pt-8 text-center text-sm text-muted-foreground">
-          <p>© 2025 The Anime Vault. All rights reserved.</p>
+        {/* Bottom Bar */}
+        <div className="border-t border-border mt-10 pt-6 flex flex-col md:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
+          <p>© 2025 The Anime Vault™. All rights reserved.</p>
+          <p>The Anime Vault™ and OtherWorlds Awakening™ are trademarks of The Anime Vault.</p>
         </div>
       </div>
 
@@ -214,7 +236,7 @@ export function Footer() {
               <p className="text-xs mt-1">Fastest way to get a response!</p>
             </div>
 
-            <p className="text-xs">We typically respond within 24-48 hours.</p>
+            <p className="text-xs">We typically respond within 24–48 hours.</p>
           </div>
         </div>
       </div>
